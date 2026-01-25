@@ -1,19 +1,17 @@
 import typer
 from rich.console import Console
-from commands.watch import watch_app
-from commands.scan import scan_app
-from commands.run import run
+from stockeye.commands import watch_app, scan_app, run
 
 console = Console()
 
 app = typer.Typer(
-    name="stockeye-cli",
+    name="stockeye",
     help="🚀 Advanced Stock Analyzer with Market Scanning"
 )
 
 # Add subcommands
-app.add_typer(watch_app, name="watch", help="Manage watchlist (add/remove/list/clear)")
-app.add_typer(scan_app, name="scan", help="Scan markets for opportunities (strong-buys/fundamentals/value)")
+app.add_typer(watch_app, name="watch")
+app.add_typer(scan_app, name="scan")
 
 @app.command()
 def analyze(
@@ -36,14 +34,13 @@ def analyze(
 @app.callback(invoke_without_command=True)
 def main(ctx: typer.Context):
     """
-    Stock Analyzer CLI - Advanced Technical & Fundamental Analysis
+    StockEye CLI - Advanced Technical & Fundamental Analysis
     """
     # If no command is provided, show help
     if ctx.invoked_subcommand is None:
         console.print("""
 ╔══════════════════════════════════════════════════════════╗
-║       🚀 Advanced Stock Analyzer CLI v4.0                ║
-║       Market Scanner • 7-Level Ratings • Multi-Market    ║
+║          StockEye - Advanced Stock Analyzer CLI          ║
 ╚══════════════════════════════════════════════════════════╝
 
 [bold cyan]Core Commands:[/bold cyan]
@@ -62,18 +59,18 @@ def main(ctx: typer.Context):
   [green]watch clear[/green]          Clear entire watchlist
 
 [bold cyan]Examples:[/bold cyan]
+  # Add and analyze your watchlist
+  [green]stockeye watch add RELIANCE.NS HDFCBANK.NS[/green]
+  [green]stockeye analyze[/green]
+
   # Find top STRONG BUY stocks from NIFTY 50
-  docker compose run stock-cli scan strong-buys
+  [green]stockeye scan strong-buys[/green]
   
   # Find fundamentally strong stocks (F-Score ≥ 6)
-  docker compose run stock-cli scan fundamentals --min-score 6
+  [green]stockeye scan fundamentals --min-score 6[/green]
   
   # Scan US market for value opportunities
-  docker compose run stock-cli scan value -u US_MEGA_CAPS
-  
-  # Add and analyze your watchlist
-  docker compose run stock-cli watch add RELIANCE.NS HDFCBANK.NS
-  docker compose run stock-cli analyze
+  [green]stockeye scan value -u US_MEGA_CAPS[/green]
 
 [bold cyan]Stock Universes:[/bold cyan]
   [yellow]NIFTY50[/yellow]          - Top 50 Indian stocks (default)
@@ -82,13 +79,13 @@ def main(ctx: typer.Context):
   [yellow]US_MEGA_CAPS[/yellow]     - Top 50 US stocks
 
 [bold cyan]Rating System:[/bold cyan]
-  [green]🟢🟢 STRONG BUY[/green]   - Exceptional opportunity
+  [green]🟢 STRONG BUY[/green]     - Exceptional opportunity
   [green]🟢 BUY[/green]            - Good entry point
-  [blue]🔵 ADD[/blue]             - Good for adding to position
+  [blue]🔵 ADD[/blue]            - Good for adding to position
   [yellow]🟡 HOLD[/yellow]           - Maintain position
-  [rgb(255,165,0)]🟠 PARTIAL EXIT[/rgb(255,165,0)]   - Consider reducing
-  [red]🔴 EXIT[/red]           - Exit position
-  [red]🔴🔴 STRONG SELL[/red]  - Urgent exit
+  [orange]🟠 PARTIAL EXIT[/orange]   - Consider reducing
+  [red]🔴 EXIT[/red]            - Exit position
+  [red]🔴 STRONG SELL[/red]     - Urgent exit
 
 [bold cyan]Technical Indicators:[/bold cyan]
   ✓ DMA 50 & 200 (Trend direction)
@@ -99,6 +96,8 @@ def main(ctx: typer.Context):
   ✓ Fundamental Scoring (ROE, D/E, Growth, Margins)
         """)
 
+def main():
+    app()
 
 if __name__ == "__main__":
-    app()
+    main()

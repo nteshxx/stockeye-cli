@@ -2,19 +2,18 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from config import PERIOD, DMA_SHORT, DMA_LONG
-from core.data_fetcher import fetch_stock
-from core.indicators import (
+from stockeye.config import PERIOD, DMA_SHORT, DMA_LONG
+from stockeye.core.data_fetcher import fetch_stock
+from stockeye.core.indicators import (
     add_dma, add_rsi, add_macd, analyze_volume,
     detect_cross_age, cross_signal,
     get_rsi_signal, get_macd_signal, get_volume_signal
 )
-from core.fundamentals import fundamental_score
-from core.rating import rating, get_cross_display
-from storage import load_watchlist
+from stockeye.core.fundamentals import fundamental_score
+from stockeye.core.rating import rating, get_cross_display
+from stockeye.storage import load_watchlist
 
 console = Console()
-
 
 def format_rsi(rsi, rsi_signal):
     """Format RSI display with color coding"""
@@ -28,7 +27,6 @@ def format_rsi(rsi, rsi_signal):
     else:
         return f"[yellow]{rsi:.1f}[/yellow]"
 
-
 def format_macd(macd_signal):
     """Format MACD signal display"""
     if macd_signal == "BULLISH":
@@ -39,7 +37,6 @@ def format_macd(macd_signal):
         return "[yellow]NEUT[/yellow]"
     return "N/A"
 
-
 def format_volume(volume_signal):
     """Format volume signal display"""
     if volume_signal == "HIGH":
@@ -49,7 +46,6 @@ def format_volume(volume_signal):
     elif volume_signal == "NORMAL":
         return "[yellow]NORM[/yellow]"
     return "N/A"
-
 
 def run(detailed=False):
     """
@@ -84,7 +80,7 @@ def run(detailed=False):
     table.add_column("MACD", justify="center")
     table.add_column("Volume", justify="center")
     table.add_column("F-Score", justify="center")
-    table.add_column("Cross", justify="left")
+    table.add_column("Cross", justify="left", no_wrap=True)
     table.add_column("Rating", justify="center", style="bold")
     
     # Progress indicator
@@ -193,3 +189,4 @@ def run(detailed=False):
         border_style="dim"
     )
     console.print(legend)
+    

@@ -1,14 +1,13 @@
 """
 Market Scanner - Find top stocks across different categories
 """
-from core.data_fetcher import fetch_stock
-from core.indicators import (
+from stockeye.core.data_fetcher import fetch_stock
+from stockeye.core.indicators import (
     add_dma, add_rsi, add_macd, analyze_volume,
     detect_cross_age, get_rsi_signal, get_macd_signal, get_volume_signal
 )
-from core.fundamentals import fundamental_score
-from core.rating import rating, get_rating_score
-
+from stockeye.core.fundamentals import fundamental_score
+from stockeye.core.rating import rating, get_rating_score
 
 # Popular stock universes for different markets
 INDIAN_NIFTY_50 = [
@@ -17,7 +16,7 @@ INDIAN_NIFTY_50 = [
     "LT.NS", "AXISBANK.NS", "BAJFINANCE.NS", "ASIANPAINT.NS", "MARUTI.NS",
     "HCLTECH.NS", "SUNPHARMA.NS", "TITAN.NS", "ULTRACEMCO.NS", "NESTLEIND.NS",
     "WIPRO.NS", "ADANIPORTS.NS", "ONGC.NS", "NTPC.NS", "POWERGRID.NS",
-    "M&M.NS", "TECHM.NS", "TATAMOTORS.NS", "BAJAJFINSV.NS", "TATASTEEL.NS",
+    "M&M.NS", "TECHM.NS", "BAJAJFINSV.NS", "TATASTEEL.NS",
     "INDUSINDBK.NS", "DIVISLAB.NS", "DRREDDY.NS", "EICHERMOT.NS", "CIPLA.NS",
     "COALINDIA.NS", "BPCL.NS", "GRASIM.NS", "BRITANNIA.NS", "SHRIRAMFIN.NS",
     "APOLLOHOSP.NS", "TATACONSUM.NS", "ADANIENT.NS", "HINDALCO.NS", "JSWSTEEL.NS",
@@ -218,3 +217,4 @@ def scan_for_value_opportunities(universe="NIFTY50", limit=50, period="1y"):
     results.sort(key=lambda x: (x["fscore"], -x["rsi"] if x["rsi"] else 0), reverse=True)
     
     return results[:limit]
+    

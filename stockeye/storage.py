@@ -2,13 +2,11 @@ import json
 import os
 from pathlib import Path
 
-WATCHLIST_FILE = "data/watchlist.json"
-
+WATCHLIST_FILE = "/app/data/watchlist.json"
 
 def ensure_data_dir():
     """Create data directory if it doesn't exist"""
     Path("data").mkdir(exist_ok=True)
-
 
 def load_watchlist():
     """Load watchlist from JSON file"""
@@ -23,14 +21,12 @@ def load_watchlist():
     except (json.JSONDecodeError, FileNotFoundError):
         return []
 
-
 def save_watchlist(symbols):
     """Save watchlist to JSON file"""
     ensure_data_dir()
     
     with open(WATCHLIST_FILE, 'w') as f:
         json.dump(symbols, f, indent=2)
-
 
 def add_symbols(symbols):
     """Add symbols to watchlist"""
@@ -46,7 +42,6 @@ def add_symbols(symbols):
     save_watchlist(watchlist)
     return added
 
-
 def remove_symbols(symbols):
     """Remove symbols from watchlist"""
     watchlist = load_watchlist()
@@ -60,7 +55,6 @@ def remove_symbols(symbols):
     
     save_watchlist(watchlist)
     return removed
-
 
 def clear_watchlist():
     """Clear entire watchlist"""

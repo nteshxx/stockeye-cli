@@ -3,17 +3,16 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from core.scanner import (
+from stockeye.core.scanner import (
     scan_for_strong_buys,
     scan_for_fundamentally_strong,
     scan_for_value_opportunities,
     get_stock_universe
 )
-from core.rating import get_cross_display
+from stockeye.core.rating import get_cross_display
 
-scan_app = typer.Typer()
+scan_app = typer.Typer(help="Scan markets for opportunities (strong-buys/fundamentals/value)")
 console = Console()
-
 
 def format_market_cap(market_cap):
     """Format market cap in billions/trillions"""

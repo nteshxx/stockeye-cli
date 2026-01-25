@@ -313,18 +313,22 @@ docker compose run stock-cli scan value --universe US_MEGA_CAPS
 ## 📁 Project Structure
 
 ```
-stock-analyzer/
+stockeye-cli/
 │
-├── app/
+├── stockeye/
+│   ├── __init__.py
 │   ├── cli.py                    # Main CLI entry (Typer)
 │   ├── config.py                 # Configuration
 │   ├── storage.py                # Watchlist management
 │   │
 │   ├── commands/
+│   │   ├── __init__.py
+│   │   ├── scan.py               # Scan commands
 │   │   ├── watch.py              # Watchlist commands
 │   │   └── run.py                # Analysis execution
 │   │
 │   └── core/
+│       ├── __init__.py
 │       ├── data_fetcher.py       # Yahoo Finance API
 │       ├── indicators.py         # Technical indicators
 │       ├── fundamentals.py       # Fundamental scoring

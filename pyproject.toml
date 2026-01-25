@@ -1,0 +1,13 @@
+[project]
+name = "stockeye"
+version = "1.0.0"
+dependencies = [
+  "typer",
+  "yfinance",
+  "pandas",
+  "pandas-ta",
+  "rich"
+]
+
+[project.scripts]
+stockeye = "stockeye.cli:main"

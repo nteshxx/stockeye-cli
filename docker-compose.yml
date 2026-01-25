@@ -1,6 +1,20 @@
 services:
-  stockeye-cli:
+  stockeye:
     build: .
+    image: stockeye-cli:1.0.0
     container_name: stockeye-cli
     stdin_open: true
     tty: true
+    command: sleep infinity
+    restart: unless-stopped
+    volumes:
+      - stockeye-data:/app/data
+    networks:
+      - stockeye-network
+  
+volumes:
+  stockeye-data:
+
+networks:
+  stockeye-network:
+    driver: bridge

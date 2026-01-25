@@ -1,11 +1,10 @@
 import typer
 from rich.console import Console
 from rich.table import Table
-from storage import load_watchlist, add_symbols, remove_symbols, clear_watchlist
+from stockeye.storage import load_watchlist, add_symbols, remove_symbols, clear_watchlist
 
-watch_app = typer.Typer()
+watch_app = typer.Typer(help="Manage watchlist (add/remove/list/clear)")
 console = Console()
-
 
 @watch_app.command("add")
 def add(symbols: list[str]):

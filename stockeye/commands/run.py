@@ -60,7 +60,7 @@ def run(detailed=False):
         console.print(Panel.fit(
             "[yellow]Watchlist is empty![/yellow]\n\n"
             "Add symbols using:\n"
-            "[cyan]docker compose run stock-cli watch add SYMBOL1 SYMBOL2[/cyan]",
+            "[cyan]stockeye watch add SYMBOL1 SYMBOL2[/cyan]",
             title="No Symbols to Analyze"
         ))
         return
@@ -171,9 +171,14 @@ def run(detailed=False):
     
     # Enhanced legend
     legend = Panel(
-        "[bold]Ratings:[/bold] [green]🟢 BUY[/green] - Strong bullish | "
-        "[yellow]🟡 HOLD[/yellow] - Mixed signals | "
-        "[red]🔴 SELL[/red] - Weak/bearish\n\n"
+        "[bold]Ratings:[/bold]\n"
+        "[green]🟢 STRONG BUY[/green] - Exceptional opportunity\n"
+        "[green]🟢 BUY[/green] - Good entry point\n"
+        "[blue]🔵 ADD[/blue] - Good for adding to position\n"
+        "[yellow]🟡 HOLD[/yellow] - Maintain position\n"
+        "[orange]🟠 PARTIAL EXIT[/orange] - Consider reducing\n"
+        "[red]🔴 EXIT[/red] - Exit position\n"
+        "[red]🔴 STRONG SELL[/red] - Urgent exit\n"
         "[bold]RSI:[/bold] [green]<30 Oversold[/green] | "
         "[yellow]30-70 Neutral[/yellow] | "
         "[red]>70 Overbought[/red]\n"

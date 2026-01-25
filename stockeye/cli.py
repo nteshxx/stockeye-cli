@@ -40,7 +40,7 @@ def main(ctx: typer.Context):
     if ctx.invoked_subcommand is None:
         console.print("""
 ╔══════════════════════════════════════════════════════════╗
-║          StockEye - Advanced Stock Analyzer CLI          ║
+║         🚀 StockEye - Advanced Stock Analyzer CLI        ║
 ╚══════════════════════════════════════════════════════════╝
 
 [bold cyan]Core Commands:[/bold cyan]
@@ -59,8 +59,10 @@ def main(ctx: typer.Context):
   [green]watch clear[/green]          Clear entire watchlist
 
 [bold cyan]Examples:[/bold cyan]
-  # Add and analyze your watchlist
+  # Add stocks to your watchlist
   [green]stockeye watch add RELIANCE.NS HDFCBANK.NS[/green]
+
+  # Analyze your watchlist
   [green]stockeye analyze[/green]
 
   # Find top STRONG BUY stocks from NIFTY 50
@@ -77,23 +79,6 @@ def main(ctx: typer.Context):
   [yellow]NIFTY_NEXT_50[/yellow]    - Next 50 Indian stocks
   [yellow]ALL_INDIAN[/yellow]       - All 100 Indian stocks
   [yellow]US_MEGA_CAPS[/yellow]     - Top 50 US stocks
-
-[bold cyan]Rating System:[/bold cyan]
-  [green]🟢 STRONG BUY[/green]     - Exceptional opportunity
-  [green]🟢 BUY[/green]            - Good entry point
-  [blue]🔵 ADD[/blue]            - Good for adding to position
-  [yellow]🟡 HOLD[/yellow]           - Maintain position
-  [orange]🟠 PARTIAL EXIT[/orange]   - Consider reducing
-  [red]🔴 EXIT[/red]            - Exit position
-  [red]🔴 STRONG SELL[/red]     - Urgent exit
-
-[bold cyan]Technical Indicators:[/bold cyan]
-  ✓ DMA 50 & 200 (Trend direction)
-  ✓ RSI (Overbought/Oversold detection)
-  ✓ MACD (Momentum analysis)
-  ✓ Volume Analysis (Conviction measurement)
-  ✓ Golden/Death Cross with age tracking
-  ✓ Fundamental Scoring (ROE, D/E, Growth, Margins)
         """)
 
 def main():

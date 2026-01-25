@@ -20,9 +20,9 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
         BUY 🟢 - Good entry point
         ADD 🔵 - Good for adding to existing position
         HOLD 🟡 - Maintain current position
-        PARTIAL EXIT 🟠 - Consider reducing position
+        REDUCE 🟠 - Consider reducing position
         EXIT 🔴 - Exit position
-        STRONG SELL 🔴🔴 - Urgent exit recommended
+        STRONG EXIT 🔴🔴 - Urgent exit recommended
     """
     cross_type = cross_info.get('type')
     days_ago = cross_info.get('days_ago', 0)
@@ -71,41 +71,41 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     # Fundamental weight: 1.5x, Technical weight: 1.0x
     combined_score = (fscore * 1.5) + tech_score
     
-    # === STRONG SELL CONDITIONS (Highest Priority) ===
+    # === STRONG EXIT CONDITIONS (Highest Priority) ===
     
     # Death cross with confirmation
     if cross_type == "DEATH_CROSS" and days_ago is not None and days_ago <= 15:
         if macd_signal == "BEARISH" or volume_signal == "HIGH":
-            return "STRONG SELL 🔴🔴"
+            return "STRONG EXIT 🔴🔴"
         return "EXIT 🔴"
     
     # Extreme overbought with bearish signals
     if rsi_extreme == "very_overbought" and macd_signal == "BEARISH" and fscore < 5:
-        return "STRONG SELL 🔴🔴"
+        return "STRONG EXIT 🔴🔴"
     
     # Recent death cross (30 days) - still bearish
     if cross_type == "DEATH_CROSS" and days_ago is not None and days_ago <= 30:
         if combined_score >= 14:  # Override only if exceptionally strong
-            return "PARTIAL EXIT 🟠"
+            return "REDUCE 🟠"
         return "EXIT 🔴"
     
-    # === PARTIAL EXIT CONDITIONS ===
+    # === REDUCE CONDITIONS ===
     
     # Overbought with weakening momentum
     if rsi_extreme == "very_overbought":
         if macd_signal == "BEARISH":
             return "EXIT 🔴"
         elif macd_signal == "NEUTRAL" or volume_signal == "LOW":
-            return "PARTIAL EXIT 🟠"
+            return "REDUCE 🟠"
     
     # Aging golden cross with deteriorating signals
     if cross_type == "GOLDEN_CROSS" and days_ago is not None and days_ago > 90:
         if macd_signal == "BEARISH" or (rsi and rsi > 70):
-            return "PARTIAL EXIT 🟠"
+            return "REDUCE 🟠"
     
     # Good fundamentals but technical breakdown
     if fscore >= 6 and tech_score <= 3:
-        return "PARTIAL EXIT 🟠"
+        return "REDUCE 🟠"
     
     # === STRONG BUY CONDITIONS ===
     
@@ -189,7 +189,7 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     
     # Default to exit for very weak signals
     if combined_score < 6:
-        return "STRONG SELL 🔴🔴"
+        return "STRONG EXIT 🔴🔴"
     
     # Final fallback
     return "EXIT 🔴"
@@ -205,9 +205,9 @@ def get_rating_score(rating_str):
         "BUY 🟢": 6,
         "ADD 🔵": 5,
         "HOLD 🟡": 4,
-        "PARTIAL EXIT 🟠": 3,
+        "REDUCE 🟠": 3,
         "EXIT 🔴": 2,
-        "STRONG SELL 🔴🔴": 1
+        "STRONG EXIT 🔴🔴": 1
     }
     return rating_scores.get(rating_str, 0)
 
@@ -225,14 +225,13 @@ def get_cross_display(cross_info):
     if cross_type is None:
         return "N/A"
     
-    emoji = "🟢" if cross_type == "GOLDEN_CROSS" else "🔴"
     cross_name = cross_type.replace("_", " ").title()
     
     if days_ago == 0:
-        return f"{cross_name} {emoji} (Today!)"
+        return f"{cross_name} today"
     elif days_ago == 1:
-        return f"{cross_name} {emoji} (Yesterday)"
+        return f"{cross_name} yesterday"
     elif days_ago is not None:
-        return f"{cross_name} {emoji} ({days_ago}d ago)"
+        return f"{cross_name} {days_ago}d ago"
     
-    return f"{cross_name} {emoji}"
+    return f"{cross_name}"

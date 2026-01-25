@@ -16,7 +16,7 @@ def add(symbols: list[str]):
     else:
         console.print("[yellow]![/yellow] All symbols already in watchlist")
     
-    show_list()
+    # show_list()
 
 
 @watch_app.command("remove")
@@ -29,7 +29,7 @@ def remove(symbols: list[str]):
     else:
         console.print("[yellow]![/yellow] No symbols found in watchlist")
     
-    show_list()
+    # show_list()
 
 
 @watch_app.command("list")
@@ -41,7 +41,7 @@ def show_list():
         console.print("[yellow]Watchlist is empty[/yellow]")
         return
     
-    table = Table(title=f"📋 Watchlist ({len(watchlist)} symbols)")
+    table = Table(title=f"📋 Watchlist")
     table.add_column("#", justify="right", style="cyan")
     table.add_column("Symbol", style="green")
     

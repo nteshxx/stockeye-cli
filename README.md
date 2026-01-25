@@ -1,36 +1,46 @@
-## 🔍 Market Scanner Features
+# 🚀 StockEye
 
-# 🚀 What's New in Version 4.0
+## ✨ Key Features
 
-## Major Features
+### 📊 Advanced Technical Indicators
+* ✅ **DMA 50 & 200** - Moving average trends
+* ✅ **RSI (Relative Strength Index)** - Overbought/oversold detection
+* ✅ **MACD** - Momentum and trend direction
+* ✅ **Volume Analysis** - Trading volume vs 20-day average
+* ✅ **Golden/Death Cross** - Crossover detection with age tracking
 
-### 🎯 7-Level Rating System (NEW!)
+### 💰 Fundamental Analysis
+* ✅ **ROE** (Return on Equity)
+* ✅ **D/E Ratio** (Debt to Equity)
+* ✅ **Revenue Growth**
+* ✅ **Profit Margins**
+* ✅ **Composite F-Score** (0-8 scale)
 
-Replaced the simple BUY/HOLD/SELL system with a sophisticated 7-level rating:
+### 🎯 7-Level Rating System
+| Rating | Description |
+|------------|-------------|
+| **STRONG BUY 🟢** | Exceptional entry opportunity |
+| **BUY 🟢** | Good entry point |
+| **ADD 🔵** | Good for adding to existing position |
+| **HOLD 🟡** | Maintain current position |
+| **PARTIAL EXIT 🟠** | Consider reducing position by 25-50% |
+| **EXIT 🔴** | Exit position completely |
+| **STRONG SELL 🔴** | Urgent exit recommended |
 
-| Old System | New System | Description |
-|------------|------------|-------------|
-| BUY 🟢 | **STRONG BUY 🟢🟢** | Exceptional entry opportunity |
-| BUY 🟢 | **BUY 🟢** | Good entry point |
-| - | **ADD 🔵** (NEW!) | Good for adding to existing position |
-| HOLD 🟡 | **HOLD 🟡** | Maintain current position |
-| - | **PARTIAL EXIT 🟠** (NEW!) | Consider reducing position by 25-50% |
-| SELL 🔴 | **EXIT 🔴** | Exit position completely |
-| SELL 🔴 | **STRONG SELL 🔴🔴** | Urgent exit recommended |
+### 🔍 Market Scanner
+* ✅ **Scan for STRONG BUY stocks** - Top opportunities across market
+* ✅ **Scan for fundamentally strong stocks** - High F-Score companies
+* ✅ **Scan for value opportunities** - Strong fundamentals, temporarily weak price
+* ✅ **Multiple stock universes** - NIFTY 50, NIFTY Next 50, US Mega Caps
 
-**Why this matters:**
-- More granular decision making
-- Clearer position management signals
-- Better risk management (PARTIAL EXIT helps take profits gradually)
-- Distinguishes between buying new vs adding to existing
+### 🌍 Multi-Market Support
+* ✅ **Indian Market** - NSE/BSE (NIFTY 50, NIFTY Next 50)
+* ✅ **US Market** - NYSE/NASDAQ (Mega Caps)
+* ✅ **Global Markets** - UK, Hong Kong, Japan, and more
 
 ---
 
-### 🔍 Market Scanner (NEW!)
-
-Scan 50-100 stocks simultaneously to find opportunities!
-
-#### Three Scan Types:
+### 🔍 Commands
 
 **1. Strong Buy Scanner**
 ```bash
@@ -50,13 +60,6 @@ docker compose run stock-cli scan value
 ```
 Finds fundamentally strong stocks at temporary discount.
 
-#### Multiple Stock Universes:
-
-- **NIFTY50** - Top 50 Indian stocks (default)
-- **NIFTY_NEXT_50** - Next 50 Indian stocks
-- **ALL_INDIAN** - All 100 Indian stocks
-- **US_MEGA_CAPS** - Top 50 US stocks
-
 #### Export to Watchlist:
 ```bash
 docker compose run stock-cli scan strong-buys --export
@@ -65,9 +68,9 @@ Instantly add scan results to your watchlist!
 
 ---
 
-### 📊 Enhanced Rating Algorithm
+### 📊 Rating Algorithm
 
-**New Scoring System:**
+**Scoring System:**
 ```
 Combined Score = (Fundamental Score × 1.5) + Technical Score
 
@@ -88,44 +91,12 @@ Fundamental Score (0-8):
 
 | Condition | Rating | Priority |
 |-----------|--------|----------|
-| Fresh Death Cross (<15d) + Bearish + High Volume | STRONG SELL 🔴🔴 | Highest |
-| RSI >75 + MACD Bearish + F-Score <5 | STRONG SELL 🔴🔴 | Highest |
-| Golden Cross (<10d) + F-Score ≥6 + MACD Bullish + High Vol | STRONG BUY 🟢🟢 | Highest |
-| RSI <25 + MACD Bullish + F-Score ≥6 | STRONG BUY 🟢🟢 | High |
+| Fresh Death Cross (<15d) + Bearish + High Volume | STRONG SELL 🔴 | Highest |
+| RSI >75 + MACD Bearish + F-Score <5 | STRONG SELL 🔴 | Highest |
+| Golden Cross (<10d) + F-Score ≥6 + MACD Bullish + High Vol | STRONG BUY 🟢 | Highest |
+| RSI <25 + MACD Bullish + F-Score ≥6 | STRONG BUY 🟢 | High |
 | RSI >70 + MACD Neutral/Bearish | PARTIAL EXIT 🟠 | Medium |
 | F-Score ≥6 + RSI Oversold | ADD 🔵 | Medium |
-
----
-
-## Detailed Improvements
-
-### Rating System Enhancements
-
-**Old Logic:**
-```python
-if combined_score >= 16: return "BUY"
-elif combined_score >= 12: return "HOLD"
-else: return "SELL"
-```
-
-**New Logic:**
-```python
-# Much more sophisticated with 30+ conditional checks
-# Considers:
-- Cross age and type
-- RSI extremes (very oversold <30, very overbought >70)
-- MACD momentum direction
-- Volume confirmation
-- Fundamental quality
-- Multi-factor combinations
-```
-
-**Key Improvements:**
-1. **ADD 🔵 Rating** - Perfect for dollar-cost averaging
-2. **PARTIAL EXIT 🟠** - Helps lock in profits gradually
-3. **STRONG BUY/SELL** - Identifies exceptional opportunities/risks
-4. **Override logic** - Fresh crosses take priority
-5. **Volume weighting** - Higher weight (3 points vs 2)
 
 ---
 
@@ -142,16 +113,7 @@ else: return "SELL"
 - Fundamental Scanner: By F-Score, then rating score
 - Value Scanner: By F-Score, then RSI (prioritizes more oversold)
 
-**Performance:**
-- Parallel processing where possible
-- Progress bars during scan
-- Error handling for failed stocks
-- ~2-3 minutes for 50 stocks
-- ~4-6 minutes for 100 stocks
-
 ---
-
-## Command Changes
 
 ### New Commands
 
@@ -177,15 +139,7 @@ docker compose run stock-cli watch clear
 
 ---
 
-## Output Changes
-
-### Old Output (v3.0)
-```
-Stock        Price    DMA50   DMA200  RSI    MACD    Volume  F-Score  Cross          Rating
-RELIANCE.NS  2845.50  2789.30 2650.10 58.3   BULL ↑  HIGH 📈    6     Golden 🟢 (23d) BUY 🟢
-```
-
-### New Output (v4.0)
+## Output
 ```
 Stock        Price    DMA50   DMA200  RSI  MACD  Volume   F-Score  Cross          Rating
 RELIANCE.NS  2845.50  2789.30 2650.10 58   ↑     HIGH 📈     7     Golden 🟢 (23d) BUY 🟢
@@ -193,7 +147,7 @@ RELIANCE.NS  2845.50  2789.30 2650.10 58   ↑     HIGH 📈     7     Golden �
 # Note: Cleaner MACD display (↑ ↓ →), rounded RSI
 ```
 
-### Scanner Output (NEW!)
+### Scanner Output
 ```
 🟢 Top 15 STRONG BUY Stocks from NIFTY50
 
@@ -209,25 +163,6 @@ Average F-Score: 7.3/8
 
 ---
 
-## Migration Guide
-
-### For Existing Users
-
-**Watchlists:** No changes needed - fully compatible
-
-**Scripts/Automation:** 
-- Old `analyze` command works exactly the same
-- You'll just see more rating levels in output
-
-**Understanding New Ratings:**
-
-If you previously looked for:
-- **BUY** → Now look for **STRONG BUY** or **BUY**
-- **HOLD** → Still **HOLD**, but also consider **ADD** for averaging
-- **SELL** → Now look for **PARTIAL EXIT** (gradual), **EXIT**, or **STRONG SELL**
-
----
-
 ## Performance Improvements
 
 1. **Faster MACD calculation** - Optimized pandas-ta usage
@@ -237,54 +172,12 @@ If you previously looked for:
 
 ---
 
-## New Files
-
-```
-app/
-  core/
-    scanner.py          # NEW - Market scanning engine
-  commands/
-    scan.py             # NEW - Scanner CLI commands
-
-docs/
-  SCANNER_GUIDE.md      # NEW - Complete scanner guide
-  WHATS_NEW_V4.md       # NEW - This file
-```
-
----
-
-## Breaking Changes
-
-**None!** Version 4.0 is fully backward compatible.
-
-- All v3.0 commands work in v4.0
-- Watchlists are compatible
-- Docker setup unchanged
-- Configuration file compatible (new fields optional)
-
----
-
 ## Known Limitations
 
 1. **Scan Speed** - 100 stocks takes 4-6 minutes (API rate limits)
 2. **Custom Lists** - Can't yet define custom stock universes
 3. **Detailed Mode** - Not yet implemented in analyze command
 4. **Backtesting** - Coming in future version
-
----
-
-## Coming in v5.0
-
-🔮 **Planned Features:**
-- Real-time alerts (Telegram/Discord)
-- Backtesting module
-- CSV/JSON export
-- Web UI dashboard
-- Scheduled scans (cron)
-- More universes (sector-specific)
-- Custom stock list support
-- Detailed breakdown mode
-- Portfolio tracking
 
 ---
 
@@ -340,46 +233,6 @@ docker compose run stock-cli scan strong-buys --universe NIFTY50
 docker compose run stock-cli scan strong-buys --universe US_MEGA_CAPS
 
 # Mix and match, diversify geography
-```
-
----
-
-## FAQ
-
-**Q: Can I still use v3.0 commands?**
-A: Yes! 100% backward compatible.
-
-**Q: Will my watchlist work?**
-A: Yes, no changes needed.
-
-**Q: Are the ratings more strict now?**
-A: Yes, STRONG BUY is rarer than old BUY, making it more meaningful.
-
-**Q: Should I scan daily?**
-A: Strong-buys: Yes. Fundamentals: Weekly is fine.
-
-**Q: Can I trust STRONG BUY ratings?**
-A: They're high-probability setups, but always do your own research and use stop losses!
-
-**Q: What if scan finds 0 stocks?**
-A: Normal during bearish markets. Try different universes or lower thresholds.
-
----
-
-## Upgrade Instructions
-
-```bash
-# Pull latest code
-git pull origin main
-
-# Rebuild Docker image
-docker compose build
-
-# Test
-docker compose run stock-cli --help
-
-# You should see scan commands listed
-docker compose run stock-cli scan --help
 ```
 
 ---
@@ -455,44 +308,6 @@ docker compose run stock-cli scan value --universe US_MEGA_CAPS
 
 ---# 🚀 Advanced Stock Analyzer CLI with Market Scanner
 
-A professional **command-line stock analyzer** featuring comprehensive technical analysis, fundamental scoring, and market-wide scanning capabilities.
-
-## ✨ Key Features
-
-### 📊 Advanced Technical Indicators
-* ✅ **DMA 50 & 200** - Moving average trends
-* ✅ **RSI (Relative Strength Index)** - Overbought/oversold detection
-* ✅ **MACD** - Momentum and trend direction
-* ✅ **Volume Analysis** - Trading volume vs 20-day average
-* ✅ **Golden/Death Cross** - Crossover detection with age tracking
-
-### 💰 Fundamental Analysis
-* ✅ **ROE** (Return on Equity)
-* ✅ **D/E Ratio** (Debt to Equity)
-* ✅ **Revenue Growth**
-* ✅ **Profit Margins**
-* ✅ **Composite F-Score** (0-8 scale)
-
-### 🎯 7-Level Rating System
-* ✅ **STRONG BUY 🟢🟢** - Exceptional entry opportunity
-* ✅ **BUY 🟢** - Good entry point
-* ✅ **ADD 🔵** - Good for adding to existing position
-* ✅ **HOLD 🟡** - Maintain current position
-* ✅ **PARTIAL EXIT 🟠** - Consider reducing position
-* ✅ **EXIT 🔴** - Exit position
-* ✅ **STRONG SELL 🔴🔴** - Urgent exit recommended
-
-### 🔍 Market Scanner
-* ✅ **Scan for STRONG BUY stocks** - Top opportunities across market
-* ✅ **Scan for fundamentally strong stocks** - High F-Score companies
-* ✅ **Scan for value opportunities** - Strong fundamentals, temporarily weak price
-* ✅ **Multiple stock universes** - NIFTY 50, NIFTY Next 50, US Mega Caps
-
-### 🌍 Multi-Market Support
-* ✅ **Indian Market** - NSE/BSE (NIFTY 50, NIFTY Next 50)
-* ✅ **US Market** - NYSE/NASDAQ (Mega Caps)
-* ✅ **Global Markets** - UK, Hong Kong, Japan, and more
-
 ---
 
 ## 📁 Project Structure
@@ -554,28 +369,6 @@ Long-term trend indicators:
 
 ---
 
-## 🎯 Rating Algorithm
-
-The analyzer uses a sophisticated multi-factor scoring system with 7 distinct rating levels:
-
-### Rating Criteria
-
-```python
-Technical Score (0-10):
-├── DMA Alignment: 0-3 points
-├── RSI Position: 0-2 points  
-├── MACD Signal: 0-2 points
-└── Volume: 0-3 points
-
-Fundamental Score (0-8):
-├── ROE > 15%: +2 points
-├── D/E < 1: +2 points
-├── Revenue Growth > 10%: +2 points
-└── Profit Margin > 10%: +2 points
-
-Combined Score = (F-Score × 1.5) + Tech Score
-```
-
 ### Rating Levels Explained
 
 | Rating | Score Range | Conditions | Action |
@@ -611,18 +404,16 @@ Combined Score = (F-Score × 1.5) + Tech Score
 ### Dockerfile
 
 ```dockerfile
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app
+
 COPY data/ ./data
 
 ENTRYPOINT ["python", "app/cli.py"]
@@ -631,11 +422,10 @@ ENTRYPOINT ["python", "app/cli.py"]
 ### docker-compose.yml
 
 ```yaml
-version: "3.9"
 services:
-  stock-cli:
+  stockeye-cli:
     build: .
-    container_name: stock-analyzer
+    container_name: stockeye
     volumes:
       - ./data:/app/data
     stdin_open: true
@@ -677,45 +467,6 @@ docker compose run stock-cli analyze
 
 ---
 
-## 📊 Sample Output
-
-```
-                     📊 Stock Analysis with Golden/Death Cross Age (4 stocks)
-┏━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
-┃ Stock        ┃   Price ┃   DMA50 ┃   DMA200 ┃ F-Score ┃ Cross Status            ┃   Rating ┃
-┡━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
-│ RELIANCE.NS  │ 2845.50 │ 2789.30 │  2650.10 │    6    │ Golden Cross 🟢 (23d)   │  BUY 🟢  │
-│ HDFCBANK.NS  │ 1678.20 │ 1695.40 │  1720.50 │    4    │ Death Cross 🔴 (12d)    │ SELL 🔴  │
-│ TCS.NS       │ 4125.80 │ 4050.20 │  3980.60 │    7    │ Golden Cross 🟢 (45d)   │  BUY 🟢  │
-│ INFY.NS      │ 1589.30 │ 1600.10 │  1625.40 │    5    │ N/A                     │ HOLD 🟡  │
-└──────────────┴─────────┴─────────┴──────────┴─────────┴─────────────────────────┴──────────┘
-
-╭────────────────────────────────────────────────────────────────────────────────────────╮
-│                                         Legend                                         │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 🟢 BUY - Strong bullish signals | 🟡 HOLD - Mixed signals | 🔴 SELL - Weak/bearish    │
-│ signals                                                                                │
-│ Golden Cross: DMA50 crosses above DMA200 (Bullish) | Death Cross: DMA50 crosses below │
-│ DMA200 (Bearish)                                                                       │
-╰────────────────────────────────────────────────────────────────────────────────────────╯
-```
-
----
-
-## 🔮 Future Enhancements
-
-- [ ] CSV export functionality
-- [ ] Telegram/Discord alerts for fresh crosses
-- [ ] Scheduled analysis with cron
-- [ ] Backtesting module
-- [ ] Web UI dashboard
-- [ ] Volume analysis
-- [ ] RSI and MACD indicators
-- [ ] Portfolio tracking
-- [ ] Historical cross performance metrics
-
----
-
 ## 📝 Configuration
 
 Edit `app/config.py` to customize:
@@ -725,24 +476,6 @@ PERIOD = "1y"          # Data fetch period
 DMA_SHORT = 50         # Short-term moving average
 DMA_LONG = 200         # Long-term moving average
 WATCHLIST_PATH = "data/watchlist.json"
-```
-
----
-
-## 🛠️ Development
-
-### Running Without Docker
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Create data directory
-mkdir -p data
-
-# Run commands
-python app/cli.py watch add RELIANCE.NS
-python app/cli.py analyze
 ```
 
 ---
@@ -1033,15 +766,6 @@ Complete guide to using the market scanner to find trading opportunities.
 
 ---
 
-## Overview
-
-The market scanner analyzes 50-100 stocks simultaneously across different universes to find:
-1. **STRONG BUY opportunities** - Best technical + fundamental setups
-2. **Fundamentally strong stocks** - High-quality companies
-3. **Value opportunities** - Quality stocks at temporary discount
-
----
-
 ## Scanner Commands
 
 ### 1. Strong Buy Scanner
@@ -1234,13 +958,6 @@ These represent potential buy-the-dip opportunities.
 - **Cap:** Comprehensive coverage
 - **Best for:** Complete Indian market scan
 - **Scan time:** ~3-5 minutes
-
-### US_MEGA_CAPS
-- **Size:** 50 stocks
-- **Market:** US (NYSE/NASDAQ)
-- **Cap:** Mega cap (>$100B)
-- **Best for:** US market investors
-- **Examples:** AAPL, MSFT, GOOGL, NVDA
 
 ---
 

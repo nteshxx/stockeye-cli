@@ -1,0 +1,6 @@
+services:
+  stockeye-cli:
+    build: .
+    container_name: stockeye-cli
+    stdin_open: true
+    tty: true

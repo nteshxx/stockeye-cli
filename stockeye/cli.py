@@ -72,13 +72,16 @@ def main(ctx: typer.Context):
   [green]stockeye scan fundamentals --min-score 6[/green]
   
   # Scan US market for value opportunities
-  [green]stockeye scan value -u US_MEGA_CAPS[/green]
+  [green]stockeye scan value -i NIFTY_500[/green]
 
-[bold cyan]Stock Universes:[/bold cyan]
-  [yellow]NIFTY50[/yellow]          - Top 50 Indian stocks (default)
-  [yellow]NIFTY_NEXT_50[/yellow]    - Next 50 Indian stocks
-  [yellow]ALL_INDIAN[/yellow]       - All 100 Indian stocks
-  [yellow]US_MEGA_CAPS[/yellow]     - Top 50 US stocks
+[bold cyan]NSE Stock Indexes:[/bold cyan]
+  [yellow]NIFTY_50[/yellow]               - Top 50 Indian stocks (default)
+  [yellow]NIFTY_100[/yellow]              - Top 100 Indian stocks
+  [yellow]NIFTY_200[/yellow]              - Top 200 Indian stocks
+  [yellow]NIFTY_500[/yellow]              - Top 500 Indian stocks
+  [yellow]NIFTY_NEXT_50[/yellow]          - Next 50 Indian stocks
+  [yellow]NIFTY_MIDCAP_100[/yellow]       - Top 100 Midcap Indian stocks
+  [yellow]NIFTY_SMALLCAP_100[/yellow]     - Top 100 Smallcap Indian stocks
         """)
 
 def main():

@@ -1,6 +1,7 @@
 """
 Market Scanner - Find top stocks across different categories
 """
+import pandas as pd
 from stockeye.core.data_fetcher import fetch_stock
 from stockeye.core.indicators import (
     add_dma, add_rsi, add_macd, analyze_volume,
@@ -8,62 +9,20 @@ from stockeye.core.indicators import (
 )
 from stockeye.core.fundamentals import fundamental_score
 from stockeye.core.rating import rating, get_rating_score
-
-# Popular stock universes for different markets
-INDIAN_NIFTY_50 = [
-    "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS",
-    "HINDUNILVR.NS", "ITC.NS", "SBIN.NS", "BHARTIARTL.NS", "KOTAKBANK.NS",
-    "LT.NS", "AXISBANK.NS", "BAJFINANCE.NS", "ASIANPAINT.NS", "MARUTI.NS",
-    "HCLTECH.NS", "SUNPHARMA.NS", "TITAN.NS", "ULTRACEMCO.NS", "NESTLEIND.NS",
-    "WIPRO.NS", "ADANIPORTS.NS", "ONGC.NS", "NTPC.NS", "POWERGRID.NS",
-    "M&M.NS", "TECHM.NS", "BAJAJFINSV.NS", "TATASTEEL.NS",
-    "INDUSINDBK.NS", "DIVISLAB.NS", "DRREDDY.NS", "EICHERMOT.NS", "CIPLA.NS",
-    "COALINDIA.NS", "BPCL.NS", "GRASIM.NS", "BRITANNIA.NS", "SHRIRAMFIN.NS",
-    "APOLLOHOSP.NS", "TATACONSUM.NS", "ADANIENT.NS", "HINDALCO.NS", "JSWSTEEL.NS",
-    "HEROMOTOCO.NS", "UPL.NS", "BAJAJ-AUTO.NS", "SBILIFE.NS", "LTIM.NS"
-]
-
-INDIAN_NIFTY_NEXT_50 = [
-    "ADANIGREEN.NS", "ADANIPOWER.NS", "BANKBARODA.NS", "BOSCHLTD.NS", "CHOLAFIN.NS",
-    "COLPAL.NS", "DABUR.NS", "DLF.NS", "GAIL.NS", "GODREJCP.NS",
-    "HDFCLIFE.NS", "HAVELLS.NS", "ICICIPRULI.NS", "INDIGO.NS", "JINDALSTEL.NS",
-    "MOTHERSON.NS", "MUTHOOTFIN.NS", "NMDC.NS", "OFSS.NS", "PAGEIND.NS",
-    "PIDILITIND.NS", "PNB.NS", "SIEMENS.NS", "SRF.NS", "TATAPOWER.NS",
-    "TORNTPHARM.NS", "TRENT.NS", "VEDL.NS", "VOLTAS.NS", "ZOMATO.NS",
-    "AUROPHARMA.NS", "BAJAJHLDNG.NS", "BERGEPAINT.NS", "BEL.NS", "CANBK.NS",
-    "RECLTD.NS", "DIXON.NS", "DMART.NS", "HAL.NS", "ICICIGI.NS",
-    "IRCTC.NS", "JIOFIN.NS", "MAXHEALTH.NS", "NAUKRI.NS", "POLICYBZR.NS",
-    "PFC.NS", "SAIL.NS", "SHREECEM.NS", "TVSMOTOR.NS", "ZYDUSLIFE.NS"
-]
-
-US_SP500_MEGA_CAPS = [
-    "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "BRK-B",
-    "LLY", "AVGO", "V", "JPM", "WMT", "XOM", "UNH", "MA", "ORCL",
-    "COST", "HD", "PG", "JNJ", "NFLX", "BAC", "ABBV", "CRM",
-    "KO", "MRK", "CVX", "AMD", "PEP", "ADBE", "TMO", "ACN",
-    "MCD", "CSCO", "ABT", "DHR", "WFC", "LIN", "TXN", "INTU",
-    "QCOM", "IBM", "VZ", "AMGN", "PM", "CAT", "NOW", "GE", "ISRG"
-]
+from stockeye.data.load_data import load_nse_data
 
 
-def get_stock_universe(universe="NIFTY50"):
+def get_stock_index(index="NIFTY_50"):
     """
-    Get predefined stock universe
+    Get predefined stock indexes
     
     Args:
-        universe: "NIFTY50", "NIFTY_NEXT_50", "US_MEGA_CAPS", or "ALL_INDIAN"
+        index: "NIFTY_50", "NIFTY_NEXT_50", "NIFTY_500"
     
     Returns:
         list: Stock symbols
     """
-    universes = {
-        "NIFTY50": INDIAN_NIFTY_50,
-        "NIFTY_NEXT_50": INDIAN_NIFTY_NEXT_50,
-        "ALL_INDIAN": INDIAN_NIFTY_50 + INDIAN_NIFTY_NEXT_50,
-        "US_MEGA_CAPS": US_SP500_MEGA_CAPS
-    }
-    
-    return universes.get(universe.upper(), INDIAN_NIFTY_50)
+    return load_nse_data(index.upper())
 
 
 def analyze_stock(symbol, period="1y"):
@@ -137,19 +96,19 @@ def analyze_stock(symbol, period="1y"):
         return None
 
 
-def scan_for_strong_buys(universe="NIFTY50", limit=50, period="1y"):
+def scan_for_strong_buys(index="NIFTY_50", limit=50, period="1y"):
     """
     Scan for top STRONG BUY stocks
     
     Args:
-        universe: Stock universe to scan
+        index: Stock index to scan
         limit: Maximum number of results
         period: Data period
     
     Returns:
         list: Top strong buy stocks sorted by rating score
     """
-    symbols = get_stock_universe(universe)
+    symbols = get_stock_index(index)
     results = []
     
     for symbol in symbols:
@@ -163,19 +122,19 @@ def scan_for_strong_buys(universe="NIFTY50", limit=50, period="1y"):
     return results[:limit]
 
 
-def scan_for_fundamentally_strong(universe="NIFTY50", limit=50, period="1y"):
+def scan_for_fundamentally_strong(index="NIFTY_50", limit=50, period="1y"):
     """
     Scan for fundamentally strong stocks (high F-Score)
     
     Args:
-        universe: Stock universe to scan
+        index: Stock index to scan
         limit: Maximum number of results
         period: Data period
     
     Returns:
         list: Top fundamental stocks sorted by F-Score
     """
-    symbols = get_stock_universe(universe)
+    symbols = get_stock_index(index)
     results = []
     
     for symbol in symbols:
@@ -189,19 +148,19 @@ def scan_for_fundamentally_strong(universe="NIFTY50", limit=50, period="1y"):
     return results[:limit]
 
 
-def scan_for_value_opportunities(universe="NIFTY50", limit=50, period="1y"):
+def scan_for_value_opportunities(index="NIFTY_50", limit=50, period="1y"):
     """
     Scan for value opportunities (strong fundamentals but temporarily weak price)
     
     Args:
-        universe: Stock universe to scan
+        index: Stock index to scan
         limit: Maximum number of results
         period: Data period
     
     Returns:
         list: Value opportunity stocks
     """
-    symbols = get_stock_universe(universe)
+    symbols = get_stock_index(index)
     results = []
     
     for symbol in symbols:

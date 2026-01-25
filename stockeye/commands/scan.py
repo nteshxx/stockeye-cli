@@ -7,7 +7,7 @@ from stockeye.core.scanner import (
     scan_for_strong_buys,
     scan_for_fundamentally_strong,
     scan_for_value_opportunities,
-    get_stock_universe
+    get_stock_index
 )
 from stockeye.core.rating import get_cross_display
 
@@ -51,7 +51,7 @@ def format_macd_compact(macd_signal):
 
 @scan_app.command("strong-buys")
 def strong_buys(
-    universe: str = typer.Option("NIFTY50", "--universe", "-u", help="Stock universe (NIFTY50, ALL_INDIAN, US_MEGA_CAPS)"),
+    index: str = typer.Option("NIFTY_50", "--index", "-i", help="Stock index (NIFTY_50, NIFTY_500, NIFTY_NEXT_50)"),
     limit: int = typer.Option(50, "--limit", "-l", help="Maximum results to show"),
     export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
 ):
@@ -65,7 +65,7 @@ def strong_buys(
     - Oversold bounces with momentum
     """
     console.print(Panel.fit(
-        f"[cyan]Scanning {universe} universe for STRONG BUY opportunities...[/cyan]",
+        f"[cyan]Scanning {index} index for STRONG BUY opportunities...[/cyan]",
         title="🔍 Market Scanner"
     ))
     
@@ -77,7 +77,7 @@ def strong_buys(
     ) as progress:
         task = progress.add_task(f"[cyan]Analyzing stocks...", total=100)
         
-        results = scan_for_strong_buys(universe, limit)
+        results = scan_for_strong_buys(index, limit)
         progress.update(task, completed=100)
     
     if not results:
@@ -86,7 +86,7 @@ def strong_buys(
     
     # Create results table
     table = Table(
-        title=f"🟢 Top {len(results)} STRONG BUY Stocks from {universe}",
+        title=f"🟢 Top {len(results)} STRONG BUY Stocks from {index}",
         show_header=True,
         header_style="bold green"
     )
@@ -146,7 +146,7 @@ def strong_buys(
 
 @scan_app.command("fundamentals")
 def fundamentals(
-    universe: str = typer.Option("NIFTY50", "--universe", "-u", help="Stock universe"),
+    index: str = typer.Option("NIFTY50", "--index", "-i", help="Stock index"),
     limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
     min_score: int = typer.Option(5, "--min-score", "-m", help="Minimum F-Score"),
     export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
@@ -161,7 +161,7 @@ def fundamentals(
     - Good Profit Margins (>10%)
     """
     console.print(Panel.fit(
-        f"[cyan]Scanning {universe} for fundamentally strong stocks (F-Score ≥ {min_score})...[/cyan]",
+        f"[cyan]Scanning {index} for fundamentally strong stocks (F-Score ≥ {min_score})...[/cyan]",
         title="💎 Fundamental Scanner"
     ))
     
@@ -173,7 +173,7 @@ def fundamentals(
     ) as progress:
         task = progress.add_task(f"[cyan]Analyzing fundamentals...", total=100)
         
-        results = scan_for_fundamentally_strong(universe, limit)
+        results = scan_for_fundamentally_strong(index, limit)
         progress.update(task, completed=100)
     
     # Filter by minimum score
@@ -240,7 +240,7 @@ def fundamentals(
 
 @scan_app.command("value")
 def value_opportunities(
-    universe: str = typer.Option("NIFTY50", "--universe", "-u", help="Stock universe"),
+    index: str = typer.Option("NIFTY50", "--index", "-i", help="Stock index"),
     limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
     export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
 ):
@@ -253,7 +253,7 @@ def value_opportunities(
     - Potential mean reversion opportunities
     """
     console.print(Panel.fit(
-        f"[cyan]Scanning {universe} for value opportunities...[/cyan]",
+        f"[cyan]Scanning {index} for value opportunities...[/cyan]",
         title="💰 Value Scanner"
     ))
     
@@ -265,7 +265,7 @@ def value_opportunities(
     ) as progress:
         task = progress.add_task(f"[cyan]Finding value stocks...", total=100)
         
-        results = scan_for_value_opportunities(universe, limit)
+        results = scan_for_value_opportunities(index, limit)
         progress.update(task, completed=100)
     
     if not results:

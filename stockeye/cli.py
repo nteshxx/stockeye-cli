@@ -27,7 +27,7 @@ def analyze(
     - Volume Analysis
     - Fundamental Score
     - Golden/Death Cross Age
-    - 7-Level Rating System (STRONG BUY to STRONG EXIT)
+    - 7-Level Rating System (STRONG BUY to STRONG SELL)
     """
     run(detailed=detailed)
 

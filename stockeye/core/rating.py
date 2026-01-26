@@ -21,8 +21,8 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
         ADD 🔵 - Good for adding to existing position
         HOLD 🟡 - Maintain current position
         REDUCE 🟠 - Consider reducing position
-        EXIT 🔴 - Exit position
-        STRONG EXIT 🔴 - Urgent exit recommended
+        SELL 🔴 - Sell position
+        STRONG SELL 🔴 - Urgent sell recommended
     """
     cross_type = cross_info.get('type')
     days_ago = cross_info.get('days_ago', 0)
@@ -71,30 +71,30 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     # Fundamental weight: 1.5x, Technical weight: 1.0x
     combined_score = (fscore * 1.5) + tech_score
     
-    # === STRONG EXIT CONDITIONS (Highest Priority) ===
+    # === STRONG SELL CONDITIONS (Highest Priority) ===
     
     # Death cross with confirmation
     if cross_type == "DEATH_CROSS" and days_ago is not None and days_ago <= 15:
         if macd_signal == "BEARISH" or volume_signal == "HIGH":
-            return "STRONG EXIT 🔴"
-        return "EXIT 🔴"
+            return "STRONG SELL 🔴"
+        return "SELL 🔴"
     
     # Extreme overbought with bearish signals
     if rsi_extreme == "very_overbought" and macd_signal == "BEARISH" and fscore < 5:
-        return "STRONG EXIT 🔴"
+        return "STRONG SELL 🔴"
     
     # Recent death cross (30 days) - still bearish
     if cross_type == "DEATH_CROSS" and days_ago is not None and days_ago <= 30:
         if combined_score >= 14:  # Override only if exceptionally strong
             return "REDUCE 🟠"
-        return "EXIT 🔴"
+        return "SELL 🔴"
     
     # === REDUCE CONDITIONS ===
     
     # Overbought with weakening momentum
     if rsi_extreme == "very_overbought":
         if macd_signal == "BEARISH":
-            return "EXIT 🔴"
+            return "SELL 🔴"
         elif macd_signal == "NEUTRAL" or volume_signal == "LOW":
             return "REDUCE 🟠"
     
@@ -176,23 +176,23 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     if cross_type == "GOLDEN_CROSS" and fscore >= 4:
         return "HOLD 🟡"
     
-    # === EXIT CONDITIONS ===
+    # === SELL CONDITIONS ===
     
     # Weak combined score
     if combined_score < 8:
         if macd_signal == "BEARISH":
-            return "EXIT 🔴"
+            return "SELL 🔴"
     
     # Poor fundamentals with weak technicals
     if fscore < 3 and tech_score < 4:
-        return "EXIT 🔴"
+        return "SELL 🔴"
     
-    # Default to exit for very weak signals
+    # Default to sell for very weak signals
     if combined_score < 6:
-        return "STRONG EXIT 🔴"
+        return "STRONG SELL 🔴"
     
     # Final fallback
-    return "EXIT 🔴"
+    return "SELL 🔴"
 
 
 def get_rating_score(rating_str):
@@ -206,8 +206,8 @@ def get_rating_score(rating_str):
         "ADD 🔵": 5,
         "HOLD 🟡": 4,
         "REDUCE 🟠": 3,
-        "EXIT 🔴": 2,
-        "STRONG EXIT 🔴🔴": 1
+        "SELL 🔴": 2,
+        "STRONG SELL 🔴🔴": 1
     }
     return rating_scores.get(rating_str, 0)
 

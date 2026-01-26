@@ -32,8 +32,8 @@
 | **ADD 🔵** | Good for adding to existing position |
 | **HOLD 🟡** | Maintain current position |
 | **REDUCE 🟠** | Consider reducing position by 25-50% |
-| **EXIT 🔴** | Exit position completely |
-| **STRONG EXIT 🔴** | Urgent exit recommended |
+| **SELL 🔴** | Sell position completely |
+| **STRONG SELL 🔴** | Urgent sell recommended |
 
 ### 🔍 Market Scanner
 * ✅ **Scan for STRONG BUY stocks** - Top opportunities across market
@@ -69,8 +69,8 @@ Fundamental Score (0-8):
 
 | Condition | Rating | Priority |
 |-----------|--------|----------|
-| Fresh Death Cross (<15d) + Bearish + High Volume | STRONG EXIT 🔴 | Highest |
-| RSI >75 + MACD Bearish + F-Score <5 | STRONG EXIT 🔴 | Highest |
+| Fresh Death Cross (<15d) + Bearish + High Volume | STRONG SELL 🔴 | Highest |
+| RSI >75 + MACD Bearish + F-Score <5 | STRONG SELL 🔴 | Highest |
 | Golden Cross (<10d) + F-Score ≥6 + MACD Bullish + High Vol | STRONG BUY 🟢 | Highest |
 | RSI <25 + MACD Bullish + F-Score ≥6 | STRONG BUY 🟢 | High |
 | RSI >70 + MACD Neutral/Bearish | REDUCE 🟠 | Medium |
@@ -141,7 +141,7 @@ Long-term trend indicators:
 
 ### Special Conditions (Override Rules)
 
-**Immediate STRONG EXIT:**
+**Immediate STRONG SELL:**
 - Death cross ≤15 days + MACD bearish + High volume
 - RSI >75 + MACD bearish + F-Score <5
 
@@ -345,7 +345,7 @@ Cross: Death Cross 🔴 (12 days ago)
 
 Rating: SELL 🔴
 
-Why: Recent death cross + weak fundamentals + bearish momentum = strong exit
+Why: Recent death cross + weak fundamentals + bearish momentum = strong sell
 ```
 
 #### Scenario 2: Overbought with Bearish Divergence
@@ -376,7 +376,7 @@ Cross: Death Cross 🔴 (8 days ago)
 
 Rating: SELL 🔴
 
-Why: All indicators bearish + fundamentally weak = exit position
+Why: All indicators bearish + fundamentally weak = sell position
 ```
 
 ---

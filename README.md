@@ -1,5 +1,13 @@
 # 🚀 StockEye
 
+<img width="1272" height="707" alt="image" src="https://github.com/user-attachments/assets/6f897852-a20f-498d-b171-a68e1ab3ba14" />
+
+<img width="1272" height="676" alt="image" src="https://github.com/user-attachments/assets/b823eb3c-1838-4779-8b19-6de4d0cd9d4c" />
+
+<img width="1268" height="612" alt="image" src="https://github.com/user-attachments/assets/1d573a9c-e617-410a-bf6f-ac7fdb78f5bf" />
+
+---
+
 ## ✨ Key Features
 
 ### 📊 Advanced Technical Indicators

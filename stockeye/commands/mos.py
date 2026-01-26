@@ -253,8 +253,8 @@ def analyze(
             console.print(f"\n[green]✓[/green] Exported {len(added)} stocks with MOS ≥40% to watchlist")
 
 
-@mos_app.command("quick")
-def quick_check(
+@mos_app.command("scan")
+def scan(
     symbol: str = typer.Argument(..., help="Stock symbol to analyze"),
 ):
     """

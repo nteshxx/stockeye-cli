@@ -7,6 +7,7 @@ from stockeye.core.scanner import (
     scan_for_strong_buys,
     scan_for_fundamentally_strong,
     scan_for_value_opportunities,
+    scan_for_graham_value,
     get_stock_index
 )
 from stockeye.core.rating import get_cross_display
@@ -314,3 +315,137 @@ def value_opportunities(
         symbols = [s["symbol"] for s in results]
         added = add_symbols(symbols)
         console.print(f"\n[green]✓[/green] Added {len(added)} symbols to watchlist")
+
+@scan_app.command("mos")
+def graham_value(
+    index: str = typer.Option("NIFTY_50", "--index", "-u", help="Stock index (NIFTY_50, NIFTY_500, etc)"),
+    limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
+    min_mos: float = typer.Option(30, "--min-mos", "-m", help="Minimum Margin of Safety %"),
+    conservative: bool = typer.Option(False, "--conservative", "-c", help="Use conservative valuation"),
+    export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
+):
+    """
+    Scan for Graham-style value stocks (Margin of Safety)
+    
+    Finds stocks with:
+    - Intrinsic value > Market price
+    - Minimum MOS threshold (default 30%)
+    - Based on EPS and growth rate
+    - Graham's formula: EPS × (8.5 + 2g)
+    """
+    console.print(Panel.fit(
+        f"[cyan]Scanning {index} for Graham value stocks (MOS ≥ {min_mos}%)...[/cyan]\n"
+        f"[dim]Method: {'Conservative' if conservative else 'Standard Graham'}[/dim]",
+        title="🛡️ Graham Value Scanner"
+    ))
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        console=console
+    ) as progress:
+        task = progress.add_task(f"[cyan]Calculating intrinsic values...", total=100)
+        
+        results = scan_for_graham_value(index, limit, min_mos, conservative)
+        progress.update(task, completed=100)
+    
+    if not results:
+        console.print()
+        console.print(Panel(
+            f"[yellow]No stocks met the minimum Margin of Safety threshold of {min_mos}%[/yellow]\n\n"
+            "Try:\n"
+            "• Lowering threshold: [cyan]--min-mos 20[/cyan]\n"
+            "• Different index: [cyan]--index NIFTY_500[/cyan]\n"
+            "• Standard method: [cyan]Remove --conservative flag[/cyan]",
+            title="📊 No Value Opportunities Found",
+            border_style="yellow"
+        ))
+        return
+    
+    # Create results table
+    table = Table(
+        title=f"🛡️ Top {len(results)} Graham Value Stocks (MOS ≥ {min_mos}%)",
+        show_header=True,
+        header_style="bold green"
+    )
+    
+    table.add_column("#", justify="right", style="dim")
+    table.add_column("Symbol", style="cyan", no_wrap=True)
+    table.add_column("Company", style="dim", max_width=20)
+    table.add_column("Price", justify="right")
+    table.add_column("EPS", justify="right")
+    table.add_column("Growth%", justify="right")
+    table.add_column("Intrinsic", justify="right", style="bold")
+    table.add_column("MOS%", justify="right", style="bold")
+    table.add_column("Rating", justify="center")
+    table.add_column("F-Score", justify="center")
+    
+    for idx, stock in enumerate(results, 1):
+        # Color code MOS percentage
+        if stock["mos_pct"] >= 50:
+            mos_color = "bold green"
+        elif stock["mos_pct"] >= 40:
+            mos_color = "green"
+        elif stock["mos_pct"] >= 30:
+            mos_color = "yellow"
+        else:
+            mos_color = "dim yellow"
+        
+        table.add_row(
+            str(idx),
+            stock["symbol"],
+            stock["company_name"],
+            f"₹{stock['price']:.2f}",
+            f"₹{stock['eps']:.2f}",
+            f"{stock['growth']:.1f}%",
+            f"₹{stock['intrinsic']:.2f}",
+            f"[{mos_color}]{stock['mos_pct']:.1f}%[/{mos_color}]",
+            stock["rating"],
+            f"{stock['fscore']}/8"
+        )
+    
+    console.print()
+    console.print(table)
+    console.print()
+    
+    # Summary statistics
+    avg_mos = sum(s["mos_pct"] for s in results) / len(results)
+    strong_value = sum(1 for s in results if s["mos_pct"] >= 50)
+    excellent_value = sum(1 for s in results if 40 <= s["mos_pct"] < 50)
+    good_value = sum(1 for s in results if 30 <= s["mos_pct"] < 40)
+    avg_fscore = sum(s["fscore"] for s in results) / len(results)
+    
+    method = "Conservative" if conservative else "Standard Graham"
+    
+    summary = Panel(
+        f"[bold]Method:[/bold] {method}\n"
+        f"[bold]Average MOS:[/bold] {avg_mos:.1f}%\n"
+        f"[bold]Average F-Score:[/bold] {avg_fscore:.1f}/8\n\n"
+        f"[bold green]STRONG VALUE (≥50%):[/bold green] {strong_value} stocks\n"
+        f"[bold cyan]EXCELLENT VALUE (40-50%):[/bold cyan] {excellent_value} stocks\n"
+        f"[bold yellow]GOOD VALUE (30-40%):[/bold yellow] {good_value} stocks",
+        title="📊 Graham Value Summary",
+        border_style="green"
+    )
+    console.print(summary)
+    
+    # Graham's wisdom
+    wisdom = Panel(
+        "[italic]\"Price is what you pay. Value is what you get.\"[/italic]\n"
+        "— Benjamin Graham\n\n"
+        "[dim]These stocks trade below intrinsic value with a margin of safety.\n"
+        "Combine with fundamental analysis (F-Score ≥6) for best results.[/dim]",
+        title="💡 Graham's Wisdom",
+        border_style="blue"
+    )
+    console.print(wisdom)
+    
+    if export:
+        # Only export stocks with MOS ≥40% (excellent value)
+        symbols_to_export = [s["symbol"] for s in results if s["mos_pct"] >= 40]
+        if symbols_to_export:
+            added = add_symbols(symbols_to_export)
+            console.print(f"\n[green]✓[/green] Exported {len(added)} stocks with MOS ≥40% to watchlist")
+        else:
+            console.print(f"\n[yellow]⚠[/yellow] No stocks with MOS ≥40% to export (threshold too high)")

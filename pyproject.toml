@@ -14,3 +14,6 @@ stockeye = "stockeye.cli:main"
 
 [tool.setuptools]
 packages = ["stockeye","stockeye.commands", "stockeye.core","stockeye.data"]
+
+[tool.setuptools.package-data]
+"stockeye.data" = ["*.csv"]

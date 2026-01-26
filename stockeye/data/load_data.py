@@ -1,9 +1,11 @@
 import pandas as pd
-from pathlib import Path
+from importlib.resources import files
 
 def load_nse_data(index: str = "NIFTY_50") -> list[str]:
-    csv_file = Path("stockeye/data") / f"{index.replace('_', '-')}.csv"
-    df = pd.read_csv(csv_file)
+
+    filename = f"{index.replace('_', '-')}.csv"
+    path = files("stockeye.data").joinpath(filename)
+    df = pd.read_csv(path)
 
     df.columns = (
         df.columns

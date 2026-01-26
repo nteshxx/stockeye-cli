@@ -7,6 +7,13 @@ from stockeye.core.indicators import (
     add_dma, add_rsi, add_macd, analyze_volume,
     detect_cross_age, get_rsi_signal, get_macd_signal, get_volume_signal
 )
+from stockeye.core.margin_of_safety import (
+    calculate_growth,
+    intrinsic_value,
+    margin_of_safety,
+    graham_rating,
+    conservative_intrinsic_value
+)
 from stockeye.core.fundamentals import fundamental_score
 from stockeye.core.rating import rating, get_rating_score
 from stockeye.data.load_data import load_nse_data
@@ -96,6 +103,69 @@ def analyze_stock(symbol, period="1y"):
         return None
 
 
+def analyze_stock_mos_value(symbol, period="5y", conservative=False):
+    """
+    Analyze a single stock for Graham-style value
+    
+    Returns:
+        dict or None: Value analysis data or None if error
+    """
+    try:
+        df, info = fetch_stock(symbol, period)
+        
+        if df is None or len(df) < 50:
+            return None
+        
+        price = df['Close'].iloc[-1]
+        
+        # Get EPS data
+        trailing_eps = info.get('trailingEps', 0)
+        forward_eps = info.get('forwardEps', 0)
+        
+        # Use average of available EPS
+        eps_values = [e for e in [trailing_eps, forward_eps] if e and e > 0]
+        
+        if not eps_values:
+            return None
+        
+        avg_eps = sum(eps_values) / len(eps_values)
+        
+        # Estimate growth from revenue growth and earnings growth
+        revenue_growth = info.get('revenueGrowth', 0) * 100 if info.get('revenueGrowth') else 0
+        earnings_growth = info.get('earningsGrowth', 0) * 100 if info.get('earningsGrowth') else 0
+        
+        # Conservative growth estimate
+        growth = (revenue_growth + earnings_growth) / 2 if (revenue_growth or earnings_growth) else 0
+        growth = max(-20, min(25, growth))  # Cap between -20% and 25%
+        
+        # Calculate intrinsic value
+        if conservative:
+            intrinsic = conservative_intrinsic_value(avg_eps, growth)
+        else:
+            intrinsic = intrinsic_value(avg_eps, growth)
+        
+        # Calculate margin of safety
+        mos_value, mos_pct = margin_of_safety(intrinsic, price)
+        
+        return {
+            "symbol": symbol,
+            "company_name": info.get('longName', symbol),
+            "price": price,
+            "eps": avg_eps,
+            "growth": growth,
+            "intrinsic": intrinsic,
+            "mos_value": mos_value,
+            "mos_pct": mos_pct,
+            "rating": graham_rating(mos_pct),
+            "market_cap": info.get("marketCap", 0),
+            "fscore": fundamental_score(info)
+        }
+        
+    except Exception as e:
+        print(f"Error analyzing value for {symbol}: {str(e)}")
+        return None
+
+
 def scan_for_strong_buys(index="NIFTY_50", limit=50, period="1y"):
     """
     Scan for top STRONG BUY stocks
@@ -176,4 +246,29 @@ def scan_for_value_opportunities(index="NIFTY_50", limit=50, period="1y"):
     results.sort(key=lambda x: (x["fscore"], -x["rsi"] if x["rsi"] else 0), reverse=True)
     
     return results[:limit]
+
+def scan_for_graham_value(index="NIFTY_50", limit=50, min_mos=30, conservative=False):
+    """
+    Scan for Graham-style value stocks (Margin of Safety analysis)
     
+    Args:
+        index: Stock index to scan
+        limit: Maximum number of results
+        min_mos: Minimum Margin of Safety percentage
+        conservative: Use conservative valuation method
+    
+    Returns:
+        list: Value stocks sorted by MOS percentage
+    """
+    symbols = get_stock_index(index)
+    results = []
+    
+    for symbol in symbols:
+        value_data = analyze_stock_mos_value(symbol, period="5y", conservative=conservative)
+        if value_data and value_data["mos_pct"] >= min_mos:
+            results.append(value_data)
+    
+    # Sort by MOS percentage (descending)
+    results.sort(key=lambda x: x["mos_pct"], reverse=True)
+    
+    return results[:limit]

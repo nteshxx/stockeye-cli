@@ -40,43 +40,49 @@ def main(ctx: typer.Context):
     # If no command is provided, show help
     if ctx.invoked_subcommand is None:
         console.print("""
-╔══════════════════════════════════════════════════════════╗
-║         🚀 StockEye - Advanced Stock Analyzer CLI        ║
-╚══════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════╗
+║                     🚀 StockeEye CLI v1.0                        ║
+╚══════════════════════════════════════════════════════════════════╝
 
-[bold cyan]Core Commands:[/bold cyan]
-  [green]analyze[/green]              Run analysis on your watchlist
-  [green]mos analyze[/green]          Run margin of safety analysis on your watchlist
-  [green]mos quick[/green]            Run margin of safety analysis on stock
+[bold cyan]Core Analysis:[/bold cyan]
+  [green]stockeye analyze[/green]              Run technical + fundamental analysis
+  [green]stockeye analyze -d[/green]           Run with detailed breakdown
   
 [bold cyan]Market Scanning:[/bold cyan]
-  [green]scan strong-buys[/green]     Find top STRONG BUY opportunities
-  [green]scan fundamentals[/green]    Find fundamentally strong stocks
-  [green]scan value[/green]           Find value opportunities (strong + cheap)
+  [green]stockeye scan strong-buys[/green]     Find top STRONG BUY opportunities
+  [green]stockeye scan fundamentals[/green]    Find fundamentally strong stocks (high F-Score)
+  [green]stockeye scan value[/green]           Find technical value opportunities
+  [green]stockeye scan mos[/green]             Find Graham value stocks (MOS analysis on indices)
+  
+[bold cyan]Graham Value Analysis:[/bold cyan]
+  [green]stockeye mos analyze[/green]          Calculate Margin of Safety for watchlist
+  [green]stockeye mos scan SYMBOL[/green]      Quick Graham analysis for single stock
   
 [bold cyan]Watchlist Management:[/bold cyan]
-  [green]watch add[/green]            Add symbols to watchlist
-  [green]watch remove[/green]         Remove symbols from watchlist
-  [green]watch list[/green]           Show current watchlist
-  [green]watch clear[/green]          Clear entire watchlist
+  [green]stockeye watch add SYMBOL1 SYMBOL2 ...[/green]       Add symbols to watchlist
+  [green]stockeye watch remove SYMBOL1 SYMBOL2 ...[/green]    Remove symbols
+  [green]stockeye watch list[/green]                          Show current watchlist
+  [green]stockeye watch clear[/green]                         Clear entire watchlist
 
 [bold cyan]Examples:[/bold cyan]
-  # Add stocks to your watchlist
-  [green]stockeye watch add RELIANCE.NS HDFCBANK.NS[/green]
-
-  # Analyze your watchlist
-  [green]stockeye analyze[/green]
-
-  # Find top STRONG BUY stocks from NIFTY 50
-  [green]stockeye scan strong-buys[/green]
+  # Market scanning
+  [blue]stockeye scan strong-buys[/blue]
+  [blue]stockeye scan fundamentals --min-score 6[/blue]
   
-  # Find fundamentally strong stocks (F-Score ≥ 6)
-  [green]stockeye scan fundamentals --min-score 6[/green]
+  # Graham value scanning on indices
+  [blue]stockeye scan mos[/blue]
+  [blue]stockeye scan mos --index NIFTY_500 --min-mos 35[/blue]
+  [blue]stockeye scan mos --conservative --export[/blue]
   
-  # Scan US market for value opportunities
-  [green]stockeye scan value -i NIFTY_500[/green]
+  # Value investing using Margin of safety
+  [blue]stockeye mos analyze --min-mos 30[/blue]
+  [blue]stockeye mos scan RELIANCE.NS[/blue]
+  
+  # Watchlist analysis
+  [blue]stockeye watch add RELIANCE.NS HDFCBANK.NS[/blue]
+  [blue]stockeye analyze[/blue]
 
-[bold cyan]NSE Stock Indexes:[/bold cyan]
+[bold cyan]NSE Stock Indices:[/bold cyan]
   [yellow]NIFTY_50[/yellow]               - Top 50 Indian stocks (default)
   [yellow]NIFTY_100[/yellow]              - Top 100 Indian stocks
   [yellow]NIFTY_200[/yellow]              - Top 200 Indian stocks

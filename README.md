@@ -493,6 +493,5 @@ MIT License - Feel free to modify and distribute
 
 Built with:
 - [yfinance](https://github.com/ranaroussi/yfinance) - Yahoo Finance data
-- [pandas-ta](https://github.com/twopirllc/pandas-ta) - Technical indicators
 - [Rich](https://github.com/Textualize/rich) - Beautiful terminal output
 - [Typer](https://github.com/tiangolo/typer) - Modern CLI framework

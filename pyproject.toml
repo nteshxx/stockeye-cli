@@ -5,9 +5,12 @@ dependencies = [
   "typer",
   "yfinance",
   "pandas",
-  "pandas-ta",
+  "pandas_ta",
   "rich"
 ]
 
 [project.scripts]
 stockeye = "stockeye.cli:main"
+
+[tool.setuptools]
+packages = ["stockeye","stockeye.commands", "stockeye.core","stockeye.data"]

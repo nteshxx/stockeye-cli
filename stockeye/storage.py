@@ -8,7 +8,7 @@ def ensure_data_dir():
     """Create data directory if it doesn't exist"""
     Path("data").mkdir(exist_ok=True)
 
-def load_watchlist():
+def load_watchlist() -> list[str]:
     """Load watchlist from JSON file"""
     ensure_data_dir()
     

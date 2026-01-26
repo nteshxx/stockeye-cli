@@ -1,6 +1,6 @@
 import typer
 from rich.console import Console
-from stockeye.commands import watch_app, scan_app, run
+from stockeye.commands import watch_app, scan_app, mos_app, run
 
 console = Console()
 
@@ -12,6 +12,7 @@ app = typer.Typer(
 # Add subcommands
 app.add_typer(watch_app, name="watch")
 app.add_typer(scan_app, name="scan")
+app.add_typer(mos_app, name="mos")
 
 @app.command()
 def analyze(
@@ -45,7 +46,8 @@ def main(ctx: typer.Context):
 
 [bold cyan]Core Commands:[/bold cyan]
   [green]analyze[/green]              Run analysis on your watchlist
-  [green]analyze -d[/green]           Run with detailed breakdown
+  [green]mos analyze[/green]          Run margin of safety analysis on your watchlist
+  [green]mos quick[/green]            Run margin of safety analysis on stock
   
 [bold cyan]Market Scanning:[/bold cyan]
   [green]scan strong-buys[/green]     Find top STRONG BUY opportunities

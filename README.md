@@ -31,7 +31,7 @@
 * ✅ **Scan for STRONG BUY stocks** - Top opportunities across market
 * ✅ **Scan for fundamentally strong stocks** - High F-Score companies
 * ✅ **Scan for value opportunities** - Strong fundamentals, temporarily weak price
-* ✅ **Multiple stock universes** - NIFTY 50, NIFTY Next 50, US Mega Caps
+* ✅ **Multiple stock indices** - NIFTY 50, NIFTY Next 50, NIFTY 100, NIFTY MIDCAP 100, NIFTY 500
 
 ### 🌍 Multi-Market Support
 * ✅ **Indian Market** - NSE/BSE (NIFTY 50, NIFTY Next 50)
@@ -190,16 +190,16 @@ stockeye analyze
 stockeye scan strong-buys
 
 # Scan all Indian stocks
-stockeye scan strong-buys --universe ALL_INDIAN
+stockeye scan strong-buys --index NIFTY_500
 
 # Scan US market
-stockeye scan strong-buys --universe NIFTY50
+stockeye scan strong-buys --index NIFTY_50
 
 # Limit results to top 25
 stockeye scan strong-buys --limit 25
 
 # Export directly to watchlist
-stockeye0 scan strong-buys --export
+stockeye scan strong-buys --export
 ```
 
 ---

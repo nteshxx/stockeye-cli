@@ -16,13 +16,13 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
         str: Trading recommendation with emoji
         
     Rating Scale:
-        STRONG BUY 🟢🟢 - Exceptional entry opportunity
+        STRONG BUY 🟢 - Exceptional entry opportunity
         BUY 🟢 - Good entry point
         ADD 🔵 - Good for adding to existing position
         HOLD 🟡 - Maintain current position
         REDUCE 🟠 - Consider reducing position
         EXIT 🔴 - Exit position
-        STRONG EXIT 🔴🔴 - Urgent exit recommended
+        STRONG EXIT 🔴 - Urgent exit recommended
     """
     cross_type = cross_info.get('type')
     days_ago = cross_info.get('days_ago', 0)
@@ -76,12 +76,12 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     # Death cross with confirmation
     if cross_type == "DEATH_CROSS" and days_ago is not None and days_ago <= 15:
         if macd_signal == "BEARISH" or volume_signal == "HIGH":
-            return "STRONG EXIT 🔴🔴"
+            return "STRONG EXIT 🔴"
         return "EXIT 🔴"
     
     # Extreme overbought with bearish signals
     if rsi_extreme == "very_overbought" and macd_signal == "BEARISH" and fscore < 5:
-        return "STRONG EXIT 🔴🔴"
+        return "STRONG EXIT 🔴"
     
     # Recent death cross (30 days) - still bearish
     if cross_type == "DEATH_CROSS" and days_ago is not None and days_ago <= 30:
@@ -112,21 +112,21 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     # Fresh golden cross with strong fundamentals and confirmation
     if cross_type == "GOLDEN_CROSS" and days_ago is not None and days_ago <= 10:
         if fscore >= 6 and macd_signal == "BULLISH" and volume_signal == "HIGH":
-            return "STRONG BUY 🟢🟢"
+            return "STRONG BUY 🟢"
         elif fscore >= 5 and macd_signal == "BULLISH":
             return "BUY 🟢"
     
     # Oversold reversal with strong fundamentals
     if rsi_extreme == "very_oversold" and macd_signal == "BULLISH":
         if fscore >= 6 and volume_signal == "HIGH":
-            return "STRONG BUY 🟢🟢"
+            return "STRONG BUY 🟢"
         elif fscore >= 4:
             return "BUY 🟢"
     
     # Exceptional combined score
     if combined_score >= 18:  # Very high bar for strong buy
         if macd_signal == "BULLISH" and volume_signal in ["HIGH", "NORMAL"]:
-            return "STRONG BUY 🟢🟢"
+            return "STRONG BUY 🟢"
     
     # === BUY CONDITIONS ===
     
@@ -189,7 +189,7 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     
     # Default to exit for very weak signals
     if combined_score < 6:
-        return "STRONG EXIT 🔴🔴"
+        return "STRONG EXIT 🔴"
     
     # Final fallback
     return "EXIT 🔴"

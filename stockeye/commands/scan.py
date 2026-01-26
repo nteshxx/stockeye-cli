@@ -10,6 +10,7 @@ from stockeye.core.scanner import (
     get_stock_index
 )
 from stockeye.core.rating import get_cross_display
+from stockeye.storage import add_symbols
 
 scan_app = typer.Typer(help="Scan markets for opportunities (strong-buys/fundamentals/value)")
 console = Console()
@@ -136,9 +137,7 @@ def strong_buys(
     )
     console.print(summary)
     
-    # Export option
     if export:
-        from storage import add_symbols
         symbols = [s["symbol"] for s in results]
         added = add_symbols(symbols)
         console.print(f"\n[green]✓[/green] Added {len(added)} symbols to watchlist")
@@ -232,7 +231,6 @@ def fundamentals(
     console.print(summary)
     
     if export:
-        from storage import add_symbols
         symbols = [s["symbol"] for s in results]
         added = add_symbols(symbols)
         console.print(f"\n[green]✓[/green] Added {len(added)} symbols to watchlist")
@@ -313,7 +311,6 @@ def value_opportunities(
     ))
     
     if export:
-        from storage import add_symbols
         symbols = [s["symbol"] for s in results]
         added = add_symbols(symbols)
         console.print(f"\n[green]✓[/green] Added {len(added)} symbols to watchlist")

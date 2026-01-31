@@ -12,7 +12,7 @@ import numpy as np
 
 def calculate_growth(eps_series, method="cagr"):
     """
-    Calculate growth rate from EPS history
+    Calculate growth rate from EPS history with null safety
     
     Args:
         eps_series: Pandas Series of historical EPS values
@@ -21,50 +21,57 @@ def calculate_growth(eps_series, method="cagr"):
     Returns:
         float: Growth rate as percentage
     """
-    if len(eps_series) < 2:
+    if eps_series is None or len(eps_series) < 2:
         return 0.0
     
-    # Remove any NaN or negative values
-    clean_eps = eps_series.dropna()
-    clean_eps = clean_eps[clean_eps > 0]
-    
-    if len(clean_eps) < 2:
-        return 0.0
-    
-    if method == "cagr":
-        # CAGR = (Ending Value / Beginning Value)^(1/n) - 1
-        start_eps = clean_eps.iloc[0]
-        end_eps = clean_eps.iloc[-1]
-        n_years = len(clean_eps) - 1
+    try:
+        # Remove any NaN or negative values
+        clean_eps = eps_series.dropna()
+        clean_eps = clean_eps[clean_eps > 0]
         
-        if start_eps <= 0:
+        if len(clean_eps) < 2:
             return 0.0
         
-        try:
-            cagr = (pow(end_eps / start_eps, 1/n_years) - 1) * 100
-            # Cap growth rate at reasonable levels (-50% to 100%)
-            return max(-50, min(100, cagr))
-        except:
+        if method == "cagr":
+            # CAGR = (Ending Value / Beginning Value)^(1/n) - 1
+            start_eps = clean_eps.iloc[0]
+            end_eps = clean_eps.iloc[-1]
+            n_years = len(clean_eps) - 1
+            
+            if start_eps is None or start_eps <= 0:
+                return 0.0
+            
+            try:
+                cagr = (pow(end_eps / start_eps, 1/n_years) - 1) * 100
+                # Cap growth rate at reasonable levels (-50% to 100%)
+                return max(-50, min(100, cagr))
+            except (ZeroDivisionError, ValueError, OverflowError):
+                return 0.0
+        
+        else:  # average growth
+            # Calculate year-over-year growth rates
+            growth_rates = []
+            for i in range(1, len(clean_eps)):
+                prev_eps = clean_eps.iloc[i-1]
+                curr_eps = clean_eps.iloc[i]
+                
+                if prev_eps is not None and prev_eps > 0 and curr_eps is not None:
+                    growth = ((curr_eps - prev_eps) / prev_eps) * 100
+                    growth_rates.append(growth)
+            
+            if growth_rates:
+                avg_growth = np.mean(growth_rates)
+                return max(-50, min(100, avg_growth))
+            
             return 0.0
-    
-    else:  # average growth
-        # Calculate year-over-year growth rates
-        growth_rates = []
-        for i in range(1, len(clean_eps)):
-            if clean_eps.iloc[i-1] > 0:
-                growth = ((clean_eps.iloc[i] - clean_eps.iloc[i-1]) / clean_eps.iloc[i-1]) * 100
-                growth_rates.append(growth)
-        
-        if growth_rates:
-            avg_growth = np.mean(growth_rates)
-            return max(-50, min(100, avg_growth))
-        
+    except Exception as e:
+        print(f"Error calculating growth: {str(e)}")
         return 0.0
 
 
 def intrinsic_value(eps, growth_rate, pe_ratio=None):
     """
-    Calculate intrinsic value using Graham's formula
+    Calculate intrinsic value using Graham's formula with null safety
     
     Graham's Formula:
     Intrinsic Value = EPS × (8.5 + 2g)
@@ -81,26 +88,45 @@ def intrinsic_value(eps, growth_rate, pe_ratio=None):
     Returns:
         float: Intrinsic value per share
     """
-    if eps <= 0:
+    if eps is None or pd.isna(eps):
         return 0.0
+        
+    try:
+        eps = float(eps)
+        if eps <= 0:
+            return 0.0
+    except (ValueError, TypeError):
+        return 0.0
+    
+    if growth_rate is None or pd.isna(growth_rate):
+        growth_rate = 0.0
+    
+    try:
+        growth_rate = float(growth_rate)
+    except (ValueError, TypeError):
+        growth_rate = 0.0
     
     # Cap growth rate for conservative estimate
     conservative_growth = min(growth_rate, 25)  # Max 25% growth assumption
     
-    if pe_ratio is not None:
-        # Use custom PE ratio
-        return eps * pe_ratio
-    else:
-        # Graham's formula: V = EPS × (8.5 + 2g)
-        # 8.5 = base PE for no-growth company
-        # 2g = growth component
-        intrinsic = eps * (8.5 + 2 * conservative_growth)
-        return max(0, intrinsic)
+    try:
+        if pe_ratio is not None:
+            # Use custom PE ratio
+            pe_ratio = float(pe_ratio)
+            return eps * pe_ratio
+        else:
+            # Graham's formula: V = EPS × (8.5 + 2g)
+            # 8.5 = base PE for no-growth company
+            # 2g = growth component
+            intrinsic = eps * (8.5 + 2 * conservative_growth)
+            return max(0, intrinsic)
+    except (ValueError, TypeError, OverflowError):
+        return 0.0
 
 
 def margin_of_safety(intrinsic_value, current_price, min_mos=20):
     """
-    Calculate Margin of Safety
+    Calculate Margin of Safety with null safety
     
     MOS = (Intrinsic Value - Current Price) / Intrinsic Value × 100
     
@@ -114,22 +140,42 @@ def margin_of_safety(intrinsic_value, current_price, min_mos=20):
     Returns:
         tuple: (mos_value, mos_percentage)
     """
-    if intrinsic_value <= 0 or current_price <= 0:
+    if intrinsic_value is None or current_price is None:
+        return (0, 0)
+        
+    if pd.isna(intrinsic_value) or pd.isna(current_price):
         return (0, 0)
     
-    mos_value = intrinsic_value - current_price
-    mos_percentage = (mos_value / intrinsic_value) * 100
-    
-    return (mos_value, mos_percentage)
+    try:
+        intrinsic_value = float(intrinsic_value)
+        current_price = float(current_price)
+        
+        if intrinsic_value <= 0 or current_price <= 0:
+            return (0, 0)
+        
+        mos_value = intrinsic_value - current_price
+        mos_percentage = (mos_value / intrinsic_value) * 100
+        
+        return (mos_value, mos_percentage)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return (0, 0)
 
 
 def graham_rating(mos_percentage):
     """
-    Rate the investment based on Graham's principles
+    Rate the investment based on Graham's principles with null safety
     
     Returns:
         str: Rating with emoji
     """
+    if mos_percentage is None or pd.isna(mos_percentage):
+        return "UNKNOWN ❓"
+    
+    try:
+        mos_percentage = float(mos_percentage)
+    except (ValueError, TypeError):
+        return "UNKNOWN ❓"
+    
     if mos_percentage >= 50:
         return "STRONG VALUE 💎💎"
     elif mos_percentage >= 40:
@@ -148,7 +194,7 @@ def graham_rating(mos_percentage):
 
 def conservative_intrinsic_value(eps, growth_rate):
     """
-    Ultra-conservative intrinsic value calculation
+    Ultra-conservative intrinsic value calculation with null safety
     
     Uses lower of:
     1. Graham's formula with capped growth
@@ -161,8 +207,23 @@ def conservative_intrinsic_value(eps, growth_rate):
     Returns:
         float: Conservative intrinsic value
     """
-    if eps <= 0:
+    if eps is None or pd.isna(eps):
         return 0.0
+    
+    try:
+        eps = float(eps)
+        if eps <= 0:
+            return 0.0
+    except (ValueError, TypeError):
+        return 0.0
+    
+    if growth_rate is None or pd.isna(growth_rate):
+        growth_rate = 0.0
+    
+    try:
+        growth_rate = float(growth_rate)
+    except (ValueError, TypeError):
+        growth_rate = 0.0
     
     # Method 1: Graham's formula with conservative growth
     graham_value = intrinsic_value(eps, min(growth_rate, 15))
@@ -176,37 +237,46 @@ def conservative_intrinsic_value(eps, growth_rate):
 
 def get_eps_metrics(eps_history):
     """
-    Calculate various EPS metrics
+    Calculate various EPS metrics with null safety
     
     Returns:
         dict: EPS metrics including average, growth, consistency
     """
-    if len(eps_history) < 1:
+    if eps_history is None or len(eps_history) < 1:
         return None
     
-    clean_eps = eps_history.dropna()
-    
-    if len(clean_eps) < 1:
+    try:
+        clean_eps = eps_history.dropna()
+        
+        if len(clean_eps) < 1:
+            return None
+        
+        metrics = {
+            "current_eps": float(clean_eps.iloc[-1]) if len(clean_eps) > 0 else 0,
+            "avg_eps_3y": float(clean_eps.tail(3).mean()) if len(clean_eps) >= 3 else float(clean_eps.mean()),
+            "avg_eps_5y": float(clean_eps.tail(5).mean()) if len(clean_eps) >= 5 else float(clean_eps.mean()),
+            "min_eps": float(clean_eps.min()),
+            "max_eps": float(clean_eps.max()),
+            "growth_3y": calculate_growth(clean_eps.tail(3)) if len(clean_eps) >= 3 else 0,
+            "growth_5y": calculate_growth(clean_eps.tail(5)) if len(clean_eps) >= 5 else 0,
+        }
+        
+        # Consistency score (0-100)
+        # Lower coefficient of variation = higher consistency
+        if len(clean_eps) >= 3:
+            mean_eps = clean_eps.mean()
+            std_eps = clean_eps.std()
+            
+            if mean_eps is not None and mean_eps > 0 and std_eps is not None:
+                cv = std_eps / mean_eps
+                consistency = max(0, 100 - (cv * 100))
+                metrics["consistency"] = min(100, consistency)
+            else:
+                metrics["consistency"] = 0
+        else:
+            metrics["consistency"] = 0
+        
+        return metrics
+    except Exception as e:
+        print(f"Error getting EPS metrics: {str(e)}")
         return None
-    
-    metrics = {
-        "current_eps": clean_eps.iloc[-1] if len(clean_eps) > 0 else 0,
-        "avg_eps_3y": clean_eps.tail(3).mean() if len(clean_eps) >= 3 else clean_eps.mean(),
-        "avg_eps_5y": clean_eps.tail(5).mean() if len(clean_eps) >= 5 else clean_eps.mean(),
-        "min_eps": clean_eps.min(),
-        "max_eps": clean_eps.max(),
-        "growth_3y": calculate_growth(clean_eps.tail(3)) if len(clean_eps) >= 3 else 0,
-        "growth_5y": calculate_growth(clean_eps.tail(5)) if len(clean_eps) >= 5 else 0,
-    }
-    
-    # Consistency score (0-100)
-    # Lower coefficient of variation = higher consistency
-    if len(clean_eps) >= 3:
-        cv = (clean_eps.std() / clean_eps.mean()) if clean_eps.mean() > 0 else 999
-        consistency = max(0, 100 - (cv * 100))
-        metrics["consistency"] = min(100, consistency)
-    else:
-        metrics["consistency"] = 0
-    
-    return metrics
-    

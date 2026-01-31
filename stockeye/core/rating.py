@@ -1,6 +1,19 @@
+import pandas as pd
+
+
+def safe_float(value, default=0.0):
+    """Safely convert value to float with null checking"""
+    if value is None or pd.isna(value):
+        return default
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
+
 def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None, volume_signal=None):
     """
-    Generate trading recommendation based on technicals and fundamentals
+    Generate trading recommendation based on technicals and fundamentals with null safety
     
     Args:
         price: Current stock price
@@ -24,34 +37,65 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
         SELL 🔴 - Sell position
         STRONG SELL 🔴 - Urgent sell recommended
     """
+    # Null safety for all inputs
+    price = safe_float(price)
+    dma50 = safe_float(dma50)
+    dma200 = safe_float(dma200)
+    
+    if fscore is None:
+        fscore = 0
+    try:
+        fscore = int(fscore)
+    except (ValueError, TypeError):
+        fscore = 0
+    
+    if cross_info is None:
+        cross_info = {}
+    
     cross_type = cross_info.get('type')
-    days_ago = cross_info.get('days_ago', 0)
+    days_ago = cross_info.get('days_ago')
+    
+    # Safely convert days_ago to int
+    if days_ago is not None:
+        try:
+            days_ago = int(days_ago)
+        except (ValueError, TypeError):
+            days_ago = None
     
     # Calculate technical score (0-10)
     tech_score = 0
     
-    # DMA alignment (0-3 points)
-    if price > dma50 > dma200:
-        tech_score += 3
-    elif price > dma50:
-        tech_score += 2
-    elif price > dma200:
-        tech_score += 1
+    # DMA alignment (0-3 points) - with null safety
+    try:
+        if price > 0 and dma50 > 0 and dma200 > 0:
+            if price > dma50 > dma200:
+                tech_score += 3
+            elif price > dma50:
+                tech_score += 2
+            elif price > dma200:
+                tech_score += 1
+    except (TypeError, ValueError):
+        pass
     
-    # RSI scoring (0-2 points)
+    # RSI scoring (0-2 points) - with null safety
     rsi_extreme = None
-    if rsi is not None:
-        if 40 <= rsi <= 60:  # Neutral zone - ideal
-            tech_score += 2
-        elif 30 <= rsi < 40:  # Slightly oversold
-            tech_score += 1
-            rsi_extreme = "oversold"
-        elif 60 < rsi <= 70:  # Slightly overbought
-            tech_score += 1
-        elif rsi < 30:
-            rsi_extreme = "very_oversold"
-        elif rsi > 70:
-            rsi_extreme = "very_overbought"
+    rsi_value = safe_float(rsi, None)
+    
+    if rsi_value is not None:
+        try:
+            if 40 <= rsi_value <= 60:  # Neutral zone - ideal
+                tech_score += 2
+            elif 30 <= rsi_value < 40:  # Slightly oversold
+                tech_score += 1
+                rsi_extreme = "oversold"
+            elif 60 < rsi_value <= 70:  # Slightly overbought
+                tech_score += 1
+            elif rsi_value < 30:
+                rsi_extreme = "very_oversold"
+            elif rsi_value > 70:
+                rsi_extreme = "very_overbought"
+        except (TypeError, ValueError):
+            pass
     
     # MACD scoring (0-2 points)
     if macd_signal == "BULLISH":
@@ -69,7 +113,10 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     
     # Calculate combined score with weighted components
     # Fundamental weight: 1.5x, Technical weight: 1.0x
-    combined_score = (fscore * 1.5) + tech_score
+    try:
+        combined_score = (fscore * 1.5) + tech_score
+    except (TypeError, ValueError):
+        combined_score = 0
     
     # === STRONG SELL CONDITIONS (Highest Priority) ===
     
@@ -100,7 +147,7 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
     
     # Aging golden cross with deteriorating signals
     if cross_type == "GOLDEN_CROSS" and days_ago is not None and days_ago > 90:
-        if macd_signal == "BEARISH" or (rsi and rsi > 70):
+        if macd_signal == "BEARISH" or (rsi_value is not None and rsi_value > 70):
             return "REDUCE 🟠"
     
     # Good fundamentals but technical breakdown
@@ -197,9 +244,12 @@ def rating(price, dma50, dma200, fscore, cross_info, rsi=None, macd_signal=None,
 
 def get_rating_score(rating_str):
     """
-    Convert rating string to numeric score for sorting
+    Convert rating string to numeric score for sorting with null safety
     Higher score = More bullish
     """
+    if rating_str is None:
+        return 0
+    
     rating_scores = {
         "STRONG BUY 🟢🟢": 7,
         "BUY 🟢": 6,
@@ -214,11 +264,14 @@ def get_rating_score(rating_str):
 
 def get_cross_display(cross_info):
     """
-    Format cross information for display
+    Format cross information for display with null safety
     
     Returns:
         str: Human-readable cross information
     """
+    if cross_info is None:
+        return "N/A"
+    
     cross_type = cross_info.get('type')
     days_ago = cross_info.get('days_ago')
     
@@ -227,11 +280,16 @@ def get_cross_display(cross_info):
     
     cross_name = cross_type.replace("_", " ").title()
     
-    if days_ago == 0:
-        return f"{cross_name} today"
-    elif days_ago == 1:
-        return f"{cross_name} yesterday"
-    elif days_ago is not None:
-        return f"{cross_name} {days_ago}d ago"
+    if days_ago is None:
+        return f"{cross_name}"
     
-    return f"{cross_name}"
+    try:
+        days_ago = int(days_ago)
+        if days_ago == 0:
+            return f"{cross_name} today"
+        elif days_ago == 1:
+            return f"{cross_name} yesterday"
+        else:
+            return f"{cross_name} {days_ago}d ago"
+    except (ValueError, TypeError):
+        return f"{cross_name}"

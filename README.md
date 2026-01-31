@@ -1,497 +1,485 @@
-# 🚀 StockEye
+# 🚀 StockEye v2.0 - Advanced Indian Stock Market Analyzer
 
-<img width="1272" height="707" alt="image" src="https://github.com/user-attachments/assets/6f897852-a20f-498d-b171-a68e1ab3ba14" />
+**Enhanced with Indian Market Intelligence**
 
-<img width="1272" height="676" alt="image" src="https://github.com/user-attachments/assets/b823eb3c-1838-4779-8b19-6de4d0cd9d4c" />
+A comprehensive command-line tool for technical and fundamental stock analysis, specifically optimized for the Indian stock market (NSE/BSE).
 
-<img width="1268" height="612" alt="image" src="https://github.com/user-attachments/assets/1d573a9c-e617-410a-bf6f-ac7fdb78f5bf" />
+## 🆕 What's New in v2.0
 
----
+### Indian Market-Specific Enhancements
 
-## ✨ Key Features
+1. **India VIX Integration** 🌡️
+   - Real-time volatility context
+   - Automatic rating adjustments based on market fear/greed
+   - VIX < 15: Favorable conditions
+   - VIX > 20: Cautious approach
+   - VIX > 25: High risk environment
 
-### 📊 Advanced Technical Indicators
-* ✅ **DMA 50 & 200** - Moving average trends
-* ✅ **RSI (Relative Strength Index)** - Overbought/oversold detection
-* ✅ **MACD** - Momentum and trend direction
-* ✅ **Volume Analysis** - Trading volume vs 20-day average
-* ✅ **Golden/Death Cross** - Crossover detection with age tracking
+2. **Bollinger Bands** 📊
+   - Popular indicator in Indian intraday trading
+   - Identifies overbought/oversold conditions
+   - Dynamic support/resistance levels
+   - Position indicator (0-100%)
 
-### 💰 Fundamental Analysis
-* ✅ **ROE** (Return on Equity)
-* ✅ **D/E Ratio** (Debt to Equity)
-* ✅ **Revenue Growth**
-* ✅ **Profit Margins**
-* ✅ **Composite F-Score** (0-8 scale)
+3. **Supertrend Indicator** 📈
+   - Widely used by Indian traders
+   - Clear bullish/bearish signals
+   - Works well in trending markets
+   - Configurable period and multiplier
 
-### 🎯 7-Level Rating System
-| Rating | Description |
-|------------|-------------|
-| **STRONG BUY 🟢** | Exceptional entry opportunity |
-| **BUY 🟢** | Good entry point |
-| **ADD 🔵** | Good for adding to existing position |
-| **HOLD 🟡** | Maintain current position |
-| **REDUCE 🟠** | Consider reducing position by 25-50% |
-| **SELL 🔴** | Sell position completely |
-| **STRONG SELL 🔴** | Urgent sell recommended |
+4. **ADX (Trend Strength)** 💪
+   - Measures trend strength (0-100)
+   - ADX > 25: Strong trend
+   - ADX < 20: Weak/ranging market
+   - Prevents false signals in sideways markets
 
-### 🔍 Market Scanner
-* ✅ **Scan for STRONG BUY stocks** - Top opportunities across market
-* ✅ **Scan for fundamentally strong stocks** - High F-Score companies
-* ✅ **Scan for value opportunities** - Strong fundamentals, temporarily weak price
-* ✅ **Multiple stock indices** - NIFTY 50, NIFTY Next 50, NIFTY 100, NIFTY MIDCAP 100, NIFTY 500
+5. **Sector-Specific Volatility Adjustments** 🏭
+   - Different RSI thresholds per sector
+   - Banking: 1.2x volatility
+   - IT: 0.9x volatility
+   - FMCG: 0.8x volatility (most stable)
+   - Realty: 1.5x volatility (highest)
+   - Auto, Metals, Energy: Adjusted accordingly
 
-### 🌍 Multi-Market Support
-* ✅ **Indian Market** - NSE/BSE (NIFTY 50, NIFTY Next 50)
-* ✅ **US Market** - NYSE/NASDAQ (Mega Caps)
-* ✅ **Global Markets** - UK, Hong Kong, Japan, and more
+6. **Calendar Effects** 📅
+   - **January-February**: Budget season volatility
+   - **December**: Historically favorable (rally)
+   - **March & September**: Unfavorable months
+   - Automatic rating adjustments based on month
 
-### 📊 Rating Algorithm
+7. **Market Regime Detection** 🎯
+   - Analyzes Nifty 50 to determine market phase
+   - Bull Market: Price > SMA50 > SMA200
+   - Bear Market: Price < SMA50 < SMA200
+   - Sideways: Mixed signals
+   - Adjusts stock ratings accordingly
 
-**Scoring System:**
-```
-Combined Score = (Fundamental Score × 1.5) + Technical Score
+8. **Enhanced Fundamental Scoring** 💎
+   - **12-point scale** (upgraded from 8)
+   - Core metrics (8 points):
+     - ROE > 15%
+     - Debt/Equity < 1
+     - Revenue Growth > 10%
+     - Profit Margins > 10%
+   - Indian-specific metrics (4 points):
+     - Promoter holding 40-70%
+     - P/B ratio < 3
+     - Dividend yield > 1%
+     - Operating margins > 15%
 
-Technical Score (0-10):
-- DMA Alignment: 0-3 points
-- RSI Position: 0-2 points
-- MACD Signal: 0-2 points
-- Volume: 0-3 points (increased from 2!)
+9. **Relative Strength Analysis** 📊
+   - Compare stock performance vs Nifty 50
+   - Identifies outperformers/underperformers
+   - 90-day rolling comparison
+   - Helps select market leaders
 
-Fundamental Score (0-8):
-- ROE > 15%: +2
-- D/E < 1: +2
-- Revenue Growth > 10%: +2
-- Profit Margins > 10%: +2
-```
+10. **Liquidity Filters** 💧
+    - Minimum volume: 1 lakh shares
+    - Minimum value: ₹50 lakhs daily
+    - Prevents illiquid stock recommendations
 
-**Special Override Conditions:**
-
-| Condition | Rating | Priority |
-|-----------|--------|----------|
-| Fresh Death Cross (<15d) + Bearish + High Volume | STRONG SELL 🔴 | Highest |
-| RSI >75 + MACD Bearish + F-Score <5 | STRONG SELL 🔴 | Highest |
-| Golden Cross (<10d) + F-Score ≥6 + MACD Bullish + High Vol | STRONG BUY 🟢 | Highest |
-| RSI <25 + MACD Bullish + F-Score ≥6 | STRONG BUY 🟢 | High |
-| RSI >70 + MACD Neutral/Bearish | REDUCE 🟠 | Medium |
-| F-Score ≥6 + RSI Oversold | ADD 🔵 | Medium |
-
----
-
-## 📁 Project Structure
-
-```
-stockeye-cli/
-│
-├── stockeye/
-│   ├── __init__.py
-│   ├── cli.py                    # Main CLI entry (Typer)
-│   ├── config.py                 # Configuration
-│   ├── storage.py                # Watchlist management
-│   │
-│   ├── commands/
-│   │   ├── __init__.py
-│   │   ├── scan.py               # Scan commands
-│   │   ├── watch.py              # Watchlist commands
-│   │   └── run.py                # Analysis execution
-│   │
-│   └── core/
-│       ├── __init__.py
-│       ├── data_fetcher.py       # Yahoo Finance API
-│       ├── indicators.py         # Technical indicators
-│       ├── fundamentals.py       # Fundamental scoring
-│       └── rating.py             # Rating algorithm
-│
-├── data/
-│   └── watchlist.json            # Persistent storage
-│
-├── requirements.txt
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
----
-
-## 📊 Indicator Guide
-
-### RSI (Relative Strength Index)
-Measures momentum on a 0-100 scale:
-- **< 30**: Oversold (potential buy opportunity)
-- **30-70**: Neutral zone
-- **> 70**: Overbought (potential sell signal)
-
-### MACD (Moving Average Convergence Divergence)
-Shows trend direction and momentum:
-- **BULLISH**: MACD line > Signal line, positive histogram
-- **BEARISH**: MACD line < Signal line, negative histogram
-- **NEUTRAL**: Crossing or flat
-
-### Volume Analysis
-Compares current volume to 20-day average:
-- **HIGH**: > 1.5x average (strong conviction)
-- **NORMAL**: 0.5x - 1.5x average
-- **LOW**: < 0.5x average (weak participation)
-
-### Golden/Death Cross
-Long-term trend indicators:
-- **Golden Cross**: DMA50 crosses above DMA200 (bullish)
-- **Death Cross**: DMA50 crosses below DMA200 (bearish)
-- **Age**: Days since last cross (fresher = stronger signal)
-
-### Special Conditions (Override Rules)
-
-**Immediate STRONG SELL:**
-- Death cross ≤15 days + MACD bearish + High volume
-- RSI >75 + MACD bearish + F-Score <5
-
-**Immediate STRONG BUY:**
-- Golden cross ≤10 days + F-Score ≥6 + MACD bullish + High volume
-- RSI <25 + MACD turning bullish + F-Score ≥6
-
-**Oversold Bounce (BUY):**
-- RSI <30 + MACD bullish + F-Score ≥4
-
-**Overbought Warning (REDUCE):**
-- RSI >70 + MACD neutral/bearish + Volume declining
-
----
-
-## 🐳 Docker Setup
-
-### 1. Build the Container
+## 📦 Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/nteshxx/stockeye-cli.git
+cd stockeye-cli
+
+# Build using docker compose
 docker compose up -d --build
+
+# Run using bash shell
+docker exec -it stockeye-cli bash
 ```
 
-### 2. Manage Watchlist
+## 🚀 Quick Start
 
 ```bash
-# Open docker shell
-docker exec -it stockeye-cli sh
+# Check version
+stockeye --version
+stockeye version
+
+# Get help
+stockeye --help
+stockeye help
+stockeye help analyze
 
 # Add stocks to watchlist
-stockeye watch add RELIANCE.NS HDFCBANK.NS TCS.NS INFY.NS
+stockeye watch add RELIANCE.NS TCS.NS INFY.NS HDFCBANK.NS
 
-# View watchlist
-stockeye watch list
+# Analyze watchlist
+stockeye analyze
+
+# Scan for opportunities
+stockeye scan strong-buys
+
+# Graham value analysis
+stockeye mos analyze --min-mos 30
+```
+
+## 📊 Core Commands
+
+### 1. Analysis Commands
+
+```bash
+# Basic analysis
+stockeye analyze
+
+# Detailed analysis (shows all indicators)
+stockeye analyze --detailed
+```
+
+**Output includes:**
+- Price vs DMA50/DMA200
+- RSI with sector-adjusted thresholds
+- MACD signals
+- Volume analysis
+- Bollinger Bands position
+- Supertrend direction
+- ADX trend strength
+- Enhanced F-Score (0-12)
+- Golden/Death Cross age
+- India VIX context
+- Market regime
+- Final rating (7 levels)
+
+### 2. Market Scanning
+
+```bash
+# Find STRONG BUY stocks
+stockeye scan strong-buys --index NIFTY_500 --limit 20 --export
+
+# Find fundamentally strong stocks
+stockeye scan fundamentals --min-score 7 --export
+
+# Find value opportunities (quality + dip)
+stockeye scan value --index NIFTY_200
+
+# Graham value screening
+stockeye scan mos --min-mos 40 --conservative --export
+```
+
+### 3. Graham Value Analysis
+
+```bash
+# Analyze watchlist
+stockeye mos analyze --min-mos 30 --conservative
+
+# Quick analysis for single stock
+stockeye mos inspect RELIANCE.NS
+```
+
+**Graham's Formula:**
+```
+Intrinsic Value = EPS × (8.5 + 2g)
+Margin of Safety = (Intrinsic - Price) / Intrinsic × 100
+```
+
+### 4. Watchlist Management
+
+```bash
+# Add stocks
+stockeye watch add SYMBOL1.NS SYMBOL2.NS
 
 # Remove stocks
-stockeye watch remove INFY.NS
+stockeye watch remove SYMBOL1.NS
 
-# Clear entire watchlist
+# List watchlist
+stockeye watch list
+
+# Clear all
 stockeye watch clear
 ```
 
-### 3. Run Analysis
+## 🎯 Rating System
 
-```bash
-# Analyze all stocks in watchlist
-stockeye analyze
+### 7-Level Rating Scale
+
+1. **STRONG BUY 🟢🟢** - Exceptional opportunity
+   - Fresh golden cross + strong fundamentals
+   - Multiple bullish confirmations
+   - High F-Score (≥6) + Strong technicals
+
+2. **BUY 🟢** - Good entry point
+   - Golden cross confirmation
+   - Strong combined score (≥17)
+   - Good fundamentals (≥5)
+
+3. **ADD 🔵** - Good for adding to position
+   - Quality stock on dip
+   - Moderate golden cross
+   - Decent combined score (≥14)
+
+4. **HOLD 🟡** - Maintain position
+   - Mixed signals
+   - Moderate scores (11-13)
+   - Wait for clearer direction
+
+5. **REDUCE 🟠** - Consider reducing
+   - Overbought conditions
+   - Weakening momentum
+   - Technical breakdown
+
+6. **SELL 🔴** - Exit position
+   - Recent death cross
+   - Weak fundamentals + technicals
+   - Bearish confirmations
+
+7. **STRONG SELL 🔴🔴** - Urgent exit
+   - Fresh death cross + bearish signals
+   - Extreme overbought + weak fundamentals
+   - Multiple bearish confirmations
+
+## 📈 Technical Indicators
+
+### Core Indicators
+- **DMA 50/200**: Trend identification
+- **RSI**: Momentum (overbought/oversold)
+- **MACD**: Trend changes and momentum
+- **Volume**: Confirmation indicator
+
+### Enhanced Indicators (v2.0)
+- **Bollinger Bands**: Volatility and price extremes
+- **Supertrend**: Trend following
+- **ADX**: Trend strength measurement
+- **India VIX**: Market volatility context
+
+## 💎 Fundamental Analysis
+
+### Enhanced F-Score (0-12 points)
+
+**Core Metrics (8 points):**
+- ROE > 15% → +2
+- Debt/Equity < 1 → +2
+- Revenue Growth > 10% → +2
+- Profit Margins > 10% → +2
+
+**Indian Metrics (4 points):**
+- Promoter Holding 40-70% → +1
+- P/B Ratio < 3 → +1
+- Dividend Yield > 1% → +1
+- Operating Margins > 15% → +1
+
+### Quality Score (0-10)
+- Beta (volatility)
+- Current Ratio (liquidity)
+- Quick Ratio (short-term health)
+- EBITDA Margins (profitability)
+- P/E ratios (valuation)
+
+### Growth Score (0-10)
+- Revenue Growth
+- Earnings Growth
+- Book Value Growth
+- Return on Assets
+
+### Value Score (0-10)
+- P/E Ratio
+- P/B Ratio
+- Dividend Yield
+- PEG Ratio
+
+## 🇮🇳 Indian Market Intelligence
+
+### Sector Classifications
+- Banking & Financial Services
+- Information Technology
+- Pharmaceuticals
+- FMCG (Consumer Goods)
+- Metals & Mining
+- Automobile
+- Real Estate
+- Energy & Power
+- Telecom
+
+### Calendar Effects
+- **Jan-Feb**: Budget volatility (conservative)
+- **March**: Tax selling (unfavorable)
+- **September**: Historically weak (unfavorable)
+- **December**: Year-end rally (favorable)
+
+### Market Regime Impact
+- **Bull Market**: More aggressive on quality stocks
+- **Bear Market**: More conservative, quality focus
+- **Sideways**: Neutral, stock-specific
+
+## 📊 Supported Indices
+
+```
+NIFTY_50           - Top 50 Indian stocks
+NIFTY_100          - Top 100 stocks
+NIFTY_200          - Top 200 stocks
+NIFTY_500          - Top 500 stocks
+NIFTY_NEXT_50      - Next 50 stocks
+NIFTY_MIDCAP_100   - Top 100 Midcap
+NIFTY_SMALLCAP_100 - Top 100 Smallcap
 ```
 
-### 4. Market Scanners
+## ⚙️ Configuration
 
-```bash
-# Basic usage (scans NIFTY 50)
-stockeye scan strong-buys
-
-# Scan all Indian stocks
-stockeye scan strong-buys --index NIFTY_500
-
-# Scan US market
-stockeye scan strong-buys --index NIFTY_50
-
-# Limit results to top 25
-stockeye scan strong-buys --limit 25
-
-# Export directly to watchlist
-stockeye scan strong-buys --export
-```
-
----
-
-## 📝 Configuration
-
-Edit `app/config.py` to customize:
+Edit `config.py` to customize:
 
 ```python
-PERIOD = "1y"          # Data fetch period
-DMA_SHORT = 50         # Short-term moving average
-DMA_LONG = 200         # Long-term moving average
+# Indicator periods
+DMA_SHORT = 50
+DMA_LONG = 200
+RSI_PERIOD = 14
+BB_PERIOD = 20
+SUPERTREND_PERIOD = 10
+
+# Indian market features
+ENABLE_INDIA_VIX = True
+ENABLE_CALENDAR_ADJUSTMENT = True
+ENABLE_MARKET_REGIME = True
+ENABLE_SECTOR_ADJUSTMENT = True
+
+# Rating thresholds
+STRONG_BUY_THRESHOLD = 20
+BUY_THRESHOLD = 17
+ADD_THRESHOLD = 14
+
+# Liquidity filters
+MIN_VOLUME_THRESHOLD = 100000
+MIN_VALUE_THRESHOLD = 5000000
 ```
 
----
+## 🔧 Advanced Features
 
-## 📊 Trading Signal Scenarios & Examples
+### Null Safety
+All functions include comprehensive null/NaN checking to prevent crashes.
 
-This document explains how different indicator combinations translate into BUY/HOLD/SELL signals.
+### Error Handling
+Graceful degradation when data is missing or API fails.
 
----
+### Performance
+- Parallel processing for bulk scanning
+- Caching for frequently accessed data
+- Rate limiting for API compliance
 
-### 🟢 Strong BUY Scenarios
+### Export Options
+- Export scan results to watchlist
+- JSON format for data persistence
+- Future: CSV, Excel support
 
-#### Scenario 1: Fresh Golden Cross with Strong Fundamentals
-```
-Stock: RELIANCE.NS
-Price: ₹2,845 (above DMA50 and DMA200)
-DMA50: ₹2,789 | DMA200: ₹2,650
-RSI: 58.3 (Neutral zone - healthy)
-MACD: BULLISH ↑ (positive momentum)
-Volume: HIGH 📈 (strong conviction)
-F-Score: 6/8 (strong fundamentals)
-Cross: Golden Cross 🟢 (23 days ago)
+## 📖 Examples
 
-Rating: BUY 🟢
+### Example 1: Daily Watchlist Review
+```bash
+# Morning routine
+stockeye watch list
+stockeye analyze --detailed
 
-Why: Fresh golden cross + strong fundamentals + bullish momentum + high volume = very strong buy signal
-```
+# Check India VIX
+# (automatically included in analysis)
 
-#### Scenario 2: Oversold Bounce with Improving Momentum
-```
-Stock: TCS.NS
-Price: ₹3,850
-RSI: 28.4 ↓ (oversold territory)
-MACD: BULLISH ↑ (turning positive)
-Volume: HIGH 📈
-F-Score: 5/8
-Cross: N/A
-
-Rating: BUY 🟢
-
-Why: RSI oversold + MACD turning bullish + decent fundamentals = potential reversal buy
+# Review recommendations
+# Focus on STRONG BUY / BUY ratings
 ```
 
-#### Scenario 3: Established Uptrend with All Indicators Aligned
-```
-Stock: INFY.NS
-Price: ₹1,650 (Price > DMA50 > DMA200)
-RSI: 55.2 (healthy neutral)
-MACD: BULLISH ↑
-Volume: NORMAL
-F-Score: 7/8
-Cross: Golden Cross 🟢 (45 days ago)
+### Example 2: Finding New Opportunities
+```bash
+# Scan for strong buys in Nifty 500
+stockeye scan strong-buys --index NIFTY_500 --limit 30
 
-Rating: BUY 🟢
+# Add promising stocks to watchlist
+stockeye watch add SYMBOL1.NS SYMBOL2.NS
 
-Why: Perfect technical alignment + excellent fundamentals = strong uptrend
+# Run detailed analysis
+stockeye analyze --detailed
 ```
 
----
+### Example 3: Value Investing
+```bash
+# Find undervalued stocks with Graham method
+stockeye scan mos --min-mos 40 --index NIFTY_500
 
-### 🟡 HOLD Scenarios
+# Quick check on specific stock
+stockeye mos scan RELIANCE.NS
 
-#### Scenario 1: Mixed Signals - Good Fundamentals, Weak Technicals
-```
-Stock: HDFCBANK.NS
-Price: ₹1,680 (below DMA50)
-DMA50: ₹1,695 | DMA200: ₹1,650
-RSI: 52.1 (neutral)
-MACD: NEUTRAL
-Volume: NORMAL
-F-Score: 6/8
-Cross: N/A
-
-Rating: HOLD 🟡
-
-Why: Strong fundamentals but weak technical setup - wait for confirmation
+# Add value stocks to watchlist for monitoring
+stockeye scan mos --min-mos 35 --export
 ```
 
-#### Scenario 2: Old Golden Cross, Weakening Momentum
-```
-Stock: WIPRO.NS
-Price: ₹580
-RSI: 48.5
-MACD: NEUTRAL
-Volume: LOW 📉
-F-Score: 5/8
-Cross: Golden Cross 🟢 (120 days ago)
+### Example 4: Sector-Specific Scan
+```bash
+# Scan IT sector (lower volatility)
+# Use NIFTY_IT index stocks
 
-Rating: HOLD 🟡
+# Scan Banking sector (higher volatility)
+# System automatically adjusts RSI thresholds
 
-Why: Old cross signal + weakening volume + neutral momentum = maintain position
+# Scan FMCG (most stable)
+# Best for conservative investors
 ```
 
-#### Scenario 3: Consolidation Phase
-```
-Stock: BAJFINANCE.NS
-Price: ₹7,250 (between DMAs)
-DMA50: ₹7,200 | DMA200: ₹7,300
-RSI: 50.0 (perfectly neutral)
-MACD: NEUTRAL
-Volume: NORMAL
-F-Score: 4/8
+## 🐛 Troubleshooting
 
-Rating: HOLD 🟡
+### Common Issues
 
-Why: All indicators neutral, price consolidating - wait for direction
-```
+1. **"Module not found" errors**
+   ```bash
+   pip install -r requirements.txt --break-system-packages
+   ```
 
----
+2. **"No data available" for stock**
+   - Check symbol format (NSE: .NS, BSE: .BO)
+   - Verify stock is actively trading
+   - Try different data period
 
-### 🔴 SELL Scenarios
+3. **Slow scanning performance**
+   - Reduce scan limit
+   - Enable parallel processing in config
+   - Check internet connection
 
-#### Scenario 1: Fresh Death Cross
-```
-Stock: YESBANK.NS
-Price: ₹18.50
-DMA50: ₹19.20 | DMA200: ₹18.80
-RSI: 45.2
-MACD: BEARISH ↓
-Volume: HIGH 📈
-F-Score: 2/8
-Cross: Death Cross 🔴 (12 days ago)
+4. **India VIX not loading**
+   - Symbol: ^INDIAVIX
+   - May not always be available
+   - Analysis continues without it
 
-Rating: SELL 🔴
+## 📝 To-Do / Future Enhancements
 
-Why: Recent death cross + weak fundamentals + bearish momentum = strong sell
-```
+- [ ] FII/DII flow data integration
+- [ ] Real-time price alerts
+- [ ] Backtesting framework
+- [ ] Portfolio tracking
+- [ ] Risk management tools
+- [ ] Web dashboard
+- [ ] Mobile app
+- [ ] Email/SMS notifications
+- [ ] Custom screening criteria
+- [ ] Historical performance tracking
 
-#### Scenario 2: Overbought with Bearish Divergence
-```
-Stock: ADANIPORTS.NS
-Price: ₹1,280
-RSI: 76.8 ↑ (overbought)
-MACD: BEARISH ↓ (divergence - price up but MACD down)
-Volume: HIGH 📈
-F-Score: 3/8
-Cross: N/A
+## 🤝 Contributing
 
-Rating: SELL 🔴
-
-Why: Extreme overbought + bearish divergence + weak fundamentals = take profits
-```
-
-#### Scenario 3: Broken Support with Poor Fundamentals
-```
-Stock: VODAFONEIDEA.NS
-Price: ₹12.30 (below both DMAs)
-DMA50: ₹13.50 | DMA200: ₹14.20
-RSI: 25.1 ↓ (oversold but still falling)
-MACD: BEARISH ↓
-Volume: HIGH 📈 (selling pressure)
-F-Score: 1/8
-Cross: Death Cross 🔴 (8 days ago)
-
-Rating: SELL 🔴
-
-Why: All indicators bearish + fundamentally weak = sell position
-```
-
----
-
-### 📈 Real Trading Examples
-
-#### Example 1: Perfect Setup Trade
-```
-Initial Signal (Day 0):
-- Stock: RELIANCE.NS @ ₹2,600
-- Golden Cross detected (0 days ago)
-- RSI: 45 (coming from oversold)
-- MACD: Just turned bullish
-- F-Score: 7/8
-- Rating: BUY 🟢
-
-After 30 Days:
-- Price: ₹2,845 (+9.4% gain)
-- RSI: 58 (healthy)
-- MACD: Strongly bullish
-- Still in uptrend
-- Rating: BUY 🟢 → Continue holding
-
-After 60 Days:
-- Price: ₹2,920 (+12.3% total gain)
-- RSI: 72 (overbought warning)
-- MACD: Still bullish but flattening
-- Rating: HOLD 🟡 → Consider taking partial profits
-```
-
-#### Example 2: Avoided Loss
-```
-Initial Analysis:
-- Stock: BANKXYZ @ ₹850
-- Death Cross 🔴 (5 days ago)
-- RSI: 55 (still neutral)
-- MACD: Bearish
-- F-Score: 3/8
-- Rating: SELL 🔴
-
-Action: Did not buy / Sold existing position
-
-After 45 Days:
-- Price dropped to ₹720 (-15.3%)
-- Saved significant loss by following the signal
-```
-
----
-
-## 🎯 Signal Strength Matrix
-
-| Scenario | RSI | MACD | Volume | F-Score | Cross | Rating | Confidence |
-|----------|-----|------|--------|---------|-------|--------|------------|
-| Perfect Storm | <30 | BULL | HIGH | 7-8 | Golden (fresh) | BUY 🟢 | ⭐⭐⭐⭐⭐ |
-| Strong Setup | 30-50 | BULL | HIGH | 6-8 | Golden | BUY 🟢 | ⭐⭐⭐⭐ |
-| Decent Entry | 40-60 | BULL | NORM | 5-6 | N/A | BUY 🟢 | ⭐⭐⭐ |
-| Neutral | 50-60 | NEUT | NORM | 4-5 | Old cross | HOLD 🟡 | ⭐⭐ |
-| Weak | 60-70 | NEUT | LOW | 3-4 | N/A | HOLD 🟡 | ⭐⭐ |
-| Warning | >70 | BEAR | HIGH | <3 | N/A | SELL 🔴 | ⭐⭐⭐ |
-| Danger | Any | BEAR | HIGH | <3 | Death (fresh) | SELL 🔴 | ⭐⭐⭐⭐⭐ |
-
----
-
-## 💡 Pro Tips
-
-### 1. Confirmation is Key
-Don't rely on a single indicator. The best signals have:
-- ✅ 3+ indicators aligned
-- ✅ Volume confirmation
-- ✅ Fundamental support
-- ✅ Clear trend direction
-
-### 2. Time Your Entries
-**Best BUY times:**
-- RSI 30-40 (recovering from oversold)
-- MACD histogram growing positive
-- Volume picking up
-- Fresh golden cross (0-30 days)
-
-**Best SELL times:**
-- RSI 70-80 (overbought)
-- MACD histogram shrinking or negative
-- Volume declining on rallies
-- Fresh death cross (0-15 days)
-
-### 3. Risk Management
-- Never go all-in on one signal
-- Use stop losses (8-10% below entry)
-- Take partial profits at resistance
-- Don't fight fresh death crosses
-
-### 4. False Signals
-Watch out for:
-- Whipsaws in choppy markets (DMAs crossing back and forth)
-- Low volume crosses (less reliable)
-- Extreme news events (override technicals temporarily)
-- Divergences (price vs indicators moving opposite)
-
----
-
-**Note:** Always do your own analysis.
-
-**Remember:** This tool provides signals, not guarantees. Always use proper risk management and never invest more than you can afford to lose.
-
----
+Contributions welcome! Please:
+1. Fork the repository
+2. Create feature branch
+3. Add tests for new features
+4. Submit pull request
 
 ## 📄 License
 
-MIT License - Feel free to modify and distribute
+MIT License - See LICENSE file
+
+## ⚠️ Disclaimer
+
+This tool is for educational and research purposes only. Not financial advice. Always do your own research before investing. Past performance doesn't guarantee future results. The Indian stock market is subject to risks and volatility.
+
+## 👥 Credits
+
+- **Technical Indicators**: pandas_ta library
+- **Data Source**: yfinance (Yahoo Finance)
+- **CLI Framework**: typer
+- **Display**: rich library
+
+## 📞 Support
+
+- Documentation: [GitHub Wiki]
+- Issues: [GitHub Issues]
+- Discussions: [GitHub Discussions]
 
 ---
 
-## 🙏 Credits
+**Made with ❤️ for Indian Stock Market Traders and Investors**
 
-Built with:
-- [yfinance](https://github.com/ranaroussi/yfinance) - Yahoo Finance data
-- [Rich](https://github.com/Textualize/rich) - Beautiful terminal output
-- [Typer](https://github.com/tiangolo/typer) - Modern CLI framework
+Version 2.0.0 | Last Updated: January 2026

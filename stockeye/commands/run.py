@@ -2,16 +2,11 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from stockeye.config import PERIOD, DMA_SHORT, DMA_LONG
-from stockeye.core.data_fetcher import fetch_stock
-from stockeye.core.indicators import (
-    add_dma, add_rsi, add_macd, analyze_volume,
-    detect_cross_age, cross_signal,
-    get_rsi_signal, get_macd_signal, get_volume_signal
-)
-from stockeye.core.fundamentals import fundamental_score
-from stockeye.core.rating import rating, get_cross_display
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from stockeye.services.analyzer import analyze_symbol
 from stockeye.storage import load_watchlist
+from stockeye.config import MAX_WORKERS
+from stockeye.core.rating import get_cross_display
 
 console = Console()
 
@@ -46,6 +41,7 @@ def format_volume(volume_signal):
     elif volume_signal == "NORMAL":
         return "[yellow]NORM[/yellow]"
     return "N/A"
+
 
 def run(detailed=False):
     """
@@ -82,6 +78,8 @@ def run(detailed=False):
     table.add_column("F-Score", justify="center")
     table.add_column("Cross", justify="left", no_wrap=True)
     table.add_column("Rating", justify="center", style="bold")
+
+    results = []
     
     # Progress indicator
     with Progress(
@@ -91,80 +89,49 @@ def run(detailed=False):
         transient=True
     ) as progress:
         task = progress.add_task("[cyan]Analyzing stocks...", total=len(symbols))
+
+        # Use ThreadPoolExecutor with 8 workers
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            # Map symbols to futures
+            future_to_sym = {executor.submit(analyze_symbol, sym): sym for sym in symbols}
+            
+            for future in as_completed(future_to_sym):
+                sym = future_to_sym[future]
+                progress.update(task, description=f"[cyan]Completed analyzing {sym}...")
+                
+                try:
+                    res = future.result()
+                    results.append(res)
+                except Exception as e:
+                    results.append({"sym": sym, "error": str(e)})
+                
+                progress.advance(task)
+
+    # Process results and add to table (sorted by symbol name)
+    for res in sorted(results, key=lambda x: x['sym']):
+        sym = res['sym']
+        if res.get("error"):
+            console.print(f"[red]Error processing {sym}: {res['error']}[/red]")
+            table.add_row(sym, "ERROR", "-", "-", "-", "-", "-", "-", "-", "N/A")
+            continue
+
+        # Format displays
+        cross_display = get_cross_display(res['cross_info'])
+        price_style = "green" if res['close'] > res['dma50'] else "red"
         
-        for sym in symbols:
-            try:
-                progress.update(task, description=f"[cyan]Analyzing {sym}...")
-                
-                # Fetch data
-                df, info = fetch_stock(sym, PERIOD)
-                
-                # Add all indicators
-                df = add_dma(df, DMA_SHORT, DMA_LONG)
-                df = add_rsi(df)
-                df = add_macd(df)
-                df = analyze_volume(df)
-                
-                last = df.iloc[-1]
-                fscore = fundamental_score(info)
-                
-                # Get indicator signals
-                rsi = last.get("RSI")
-                rsi_signal = get_rsi_signal(rsi)
-                
-                macd_val = last.get("MACD")
-                macd_sig = last.get("MACD_Signal")
-                macd_hist = last.get("MACD_Hist")
-                macd_signal = get_macd_signal(macd_val, macd_sig, macd_hist)
-                
-                volume_ratio = last.get("Volume_Ratio")
-                volume_signal = get_volume_signal(volume_ratio)
-                
-                # Detect cross and calculate age
-                cross_info = detect_cross_age(df)
-                
-                # Check for immediate cross
-                immediate_cross = cross_signal(df)
-                if immediate_cross:
-                    cross_info['type'] = immediate_cross
-                    cross_info['days_ago'] = 0
-                
-                # Generate rating with all indicators
-                decision = rating(
-                    last["Close"], 
-                    last["DMA50"], 
-                    last["DMA200"], 
-                    fscore, 
-                    cross_info,
-                    rsi,
-                    macd_signal,
-                    volume_signal
-                )
-                
-                # Format displays
-                cross_display = get_cross_display(cross_info)
-                price_style = "green" if last["Close"] > last["DMA50"] else "red"
-                
-                table.add_row(
-                    sym,
-                    f"[{price_style}]{last['Close']:.2f}[/{price_style}]",
-                    f"{last['DMA50']:.2f}" if last['DMA50'] else "N/A",
-                    f"{last['DMA200']:.2f}" if last['DMA200'] else "N/A",
-                    format_rsi(rsi, rsi_signal),
-                    format_macd(macd_signal),
-                    format_volume(volume_signal),
-                    str(fscore),
-                    cross_display,
-                    decision
-                )
-                
-                progress.advance(task)
-                
-            except Exception as e:
-                console.print(f"[red]Error processing {sym}: {str(e)}[/red]")
-                table.add_row(sym, "ERROR", "-", "-", "-", "-", "-", "-", "-", "N/A")
-                progress.advance(task)
-    
+        table.add_row(
+            sym,
+            f"[{price_style}]{res['close']:.2f}[/{price_style}]",
+            f"{res['dma50']:.2f}" if res['dma50'] else "N/A",
+            f"{res['dma200']:.2f}" if res['dma200'] else "N/A",
+            format_rsi(res['rsi'], res['rsi_signal']),
+            format_macd(res['macd_signal']),
+            format_volume(res['volume_signal']),
+            str(res['fscore']),
+            cross_display,
+            res['decision']
+        )
+
     console.print()
     console.print(table)
     console.print()
@@ -172,13 +139,13 @@ def run(detailed=False):
     # Enhanced legend
     legend = Panel(
         "[bold]Ratings:[/bold]\n"
-        "[green]🟢 STRONG BUY[/green] - Exceptional opportunity\n"
+        "[green]🟢🟢 STRONG BUY[/green] - Exceptional opportunity\n"
         "[green]🟢 BUY[/green] - Good entry point\n"
         "[blue]🔵 ADD[/blue] - Good for adding to position\n"
         "[yellow]🟡 HOLD[/yellow] - Maintain position\n"
         "[orange]🟠 REDUCE[/orange] - Consider reducing\n"
         "[red]🔴 SELL[/red] - Sell position\n"
-        "[red]🔴 STRONG SELL[/red] - Urgent sell\n"
+        "[red]🔴🔴 STRONG SELL[/red] - Urgent sell\n"
         "[bold]RSI:[/bold] [green]<30 Oversold[/green] | "
         "[yellow]30-70 Neutral[/yellow] | "
         "[red]>70 Overbought[/red]\n"

@@ -2,7 +2,7 @@
 Market Scanner - Find top stocks across different categories
 """
 import pandas as pd
-from stockeye.core.data_fetcher import fetch_stock
+from stockeye.services.data_fetcher import fetch_stock
 from stockeye.core.indicators import (
     add_dma, add_rsi, add_macd, analyze_volume,
     detect_cross_age, get_rsi_signal, get_macd_signal, get_volume_signal

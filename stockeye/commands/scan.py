@@ -3,7 +3,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from stockeye.core.scanner import (
+from stockeye.services.scanner import (
     scan_for_strong_buys,
     scan_for_fundamentally_strong,
     scan_for_value_opportunities,

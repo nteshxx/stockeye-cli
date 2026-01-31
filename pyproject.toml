@@ -1,6 +1,6 @@
 [project]
 name = "stockeye"
-version = "1.0.0"
+version = "2.0.0"
 dependencies = [
   "typer",
   "yfinance",
@@ -13,7 +13,13 @@ dependencies = [
 stockeye = "stockeye.cli:main"
 
 [tool.setuptools]
-packages = ["stockeye","stockeye.commands", "stockeye.core","stockeye.data"]
+packages = [
+  "stockeye",
+  "stockeye.commands",
+  "stockeye.core",
+  "stockeye.services",
+  "stockeye.data",
+]
 
 [tool.setuptools.package-data]
 "stockeye.data" = ["*.csv"]

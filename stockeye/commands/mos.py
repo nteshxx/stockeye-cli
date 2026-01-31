@@ -5,7 +5,7 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from stockeye.storage import load_watchlist
-from stockeye.core.data_fetcher import fetch_stock
+from stockeye.services.data_fetcher import fetch_stock
 from stockeye.core.margin_of_safety import (
     calculate_growth,
     intrinsic_value,
@@ -253,8 +253,8 @@ def analyze(
             console.print(f"\n[green]✓[/green] Exported {len(added)} stocks with MOS ≥40% to watchlist")
 
 
-@mos_app.command("scan")
-def scan(
+@mos_app.command("inspect")
+def inspect(
     symbol: str = typer.Argument(..., help="Stock symbol to analyze"),
 ):
     """

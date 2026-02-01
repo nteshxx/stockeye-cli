@@ -13,7 +13,7 @@ from stockeye.services.scanner import (
 from stockeye.core.rating import get_cross_display
 from stockeye.storage import add_symbols
 
-scan_app = typer.Typer(help="Scan markets for opportunities (strong-buys/fundamentals/value)")
+scan_app = typer.Typer(help="🔍 Scan markets for opportunities")
 console = Console()
 
 def format_market_cap(market_cap):
@@ -90,7 +90,8 @@ def strong_buys(
     table = Table(
         title=f"🟢 Top {len(results)} STRONG BUY Stocks from {index}",
         show_header=True,
-        header_style="bold green"
+        header_style="bold green",
+        show_lines=True,
     )
     
     table.add_column("#", justify="right", style="dim")
@@ -101,7 +102,7 @@ def strong_buys(
     table.add_column("RSI", justify="center")
     table.add_column("MACD", justify="center")
     table.add_column("Cross", justify="left", max_width=20)
-    table.add_column("Rating", justify="center", style="bold")
+    table.add_column("Rating", justify="left", style="bold")
     table.add_column("Mkt Cap", justify="right", style="dim")
     
     for idx, stock in enumerate(results, 1):
@@ -112,7 +113,7 @@ def strong_buys(
             stock["symbol"],
             stock["company_name"],
             f"{stock['price']:.2f}",
-            str(stock["fscore"]),
+            f"{stock['fscore']}/12",
             format_rsi_compact(stock["rsi"], stock["rsi_signal"]),
             format_macd_compact(stock["macd_signal"]),
             cross_display,
@@ -127,12 +128,10 @@ def strong_buys(
     # Summary stats
     strong_buy_count = sum(1 for s in results if "STRONG BUY" in s["rating"])
     buy_count = sum(1 for s in results if s["rating"] == "BUY 🟢")
-    avg_fscore = sum(s["fscore"] for s in results) / len(results)
     
     summary = Panel(
         f"[green]STRONG BUY:[/green] {strong_buy_count} stocks\n"
-        f"[cyan]BUY:[/cyan] {buy_count} stocks\n"
-        f"[yellow]Average F-Score:[/yellow] {avg_fscore:.1f}/8",
+        f"[cyan]BUY:[/cyan] {buy_count} stocks",
         title="📊 Summary",
         border_style="green"
     )
@@ -146,9 +145,9 @@ def strong_buys(
 
 @scan_app.command("fundamentals")
 def fundamentals(
-    index: str = typer.Option("NIFTY50", "--index", "-i", help="Stock index"),
+    index: str = typer.Option("NIFTY_50", "--index", "-i", help="Stock index"),
     limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
-    min_score: int = typer.Option(5, "--min-score", "-m", help="Minimum F-Score"),
+    min_score: int = typer.Option(9, "--min-score", "-m", help="Minimum F-Score"),
     export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
 ):
     """
@@ -187,7 +186,8 @@ def fundamentals(
     table = Table(
         title=f"💎 Top {len(results)} Fundamentally Strong Stocks (F-Score ≥ {min_score})",
         show_header=True,
-        header_style="bold magenta"
+        header_style="bold magenta",
+        show_lines=True,
     )
     
     table.add_column("#", justify="right", style="dim")
@@ -197,7 +197,7 @@ def fundamentals(
     table.add_column("Price", justify="right")
     table.add_column("RSI", justify="center")
     table.add_column("MACD", justify="center")
-    table.add_column("Rating", justify="center")
+    table.add_column("Rating", justify="left")
     table.add_column("Mkt Cap", justify="right", style="dim")
     
     for idx, stock in enumerate(results, 1):
@@ -205,7 +205,7 @@ def fundamentals(
             str(idx),
             stock["symbol"],
             stock["company_name"],
-            f"{stock['fscore']}/8",
+            f"{stock['fscore']}/12",
             f"{stock['price']:.2f}",
             format_rsi_compact(stock["rsi"], stock["rsi_signal"]),
             format_macd_compact(stock["macd_signal"]),
@@ -218,14 +218,12 @@ def fundamentals(
     console.print()
     
     # Summary
-    perfect_score = sum(1 for s in results if s["fscore"] == 8)
-    excellent_score = sum(1 for s in results if s["fscore"] >= 7)
-    avg_fscore = sum(s["fscore"] for s in results) / len(results)
+    perfect_score = sum(1 for s in results if s["fscore"] == 12)
+    excellent_score = sum(1 for s in results if s["fscore"] >= 9)
     
     summary = Panel(
-        f"[green]Perfect Score (8/8):[/green] {perfect_score} stocks\n"
-        f"[cyan]Excellent (≥7/8):[/cyan] {excellent_score} stocks\n"
-        f"[yellow]Average F-Score:[/yellow] {avg_fscore:.1f}/8",
+        f"[green]Perfect Score (12/12):[/green] {perfect_score} stocks\n"
+        f"[cyan]Excellent (≥9/12):[/cyan] {excellent_score} stocks",
         title="📊 Fundamental Quality",
         border_style="magenta"
     )
@@ -239,7 +237,7 @@ def fundamentals(
 
 @scan_app.command("value")
 def value_opportunities(
-    index: str = typer.Option("NIFTY50", "--index", "-i", help="Stock index"),
+    index: str = typer.Option("NIFTY_50", "--index", "-i", help="Stock index"),
     limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
     export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
 ):
@@ -275,7 +273,8 @@ def value_opportunities(
     table = Table(
         title=f"💰 Top {len(results)} Value Opportunities",
         show_header=True,
-        header_style="bold blue"
+        header_style="bold blue",
+        show_lines=True,
     )
     
     table.add_column("#", justify="right", style="dim")
@@ -284,7 +283,7 @@ def value_opportunities(
     table.add_column("F-Score", justify="center", style="bold")
     table.add_column("Price", justify="right")
     table.add_column("RSI", justify="center")
-    table.add_column("Rating", justify="center")
+    table.add_column("Rating", justify="left")
     table.add_column("Mkt Cap", justify="right", style="dim")
     
     for idx, stock in enumerate(results, 1):
@@ -292,7 +291,7 @@ def value_opportunities(
             str(idx),
             stock["symbol"],
             stock["company_name"],
-            f"{stock['fscore']}/8",
+            f"{stock['fscore']}/12",
             f"{stock['price']:.2f}",
             format_rsi_compact(stock["rsi"], stock["rsi_signal"]),
             stock["rating"],
@@ -367,7 +366,8 @@ def graham_value(
     table = Table(
         title=f"🛡️ Top {len(results)} Graham Value Stocks (MOS ≥ {min_mos}%)",
         show_header=True,
-        header_style="bold green"
+        header_style="bold green",
+        show_lines=True,
     )
     
     table.add_column("#", justify="right", style="dim")
@@ -378,7 +378,7 @@ def graham_value(
     table.add_column("Growth%", justify="right")
     table.add_column("Intrinsic", justify="right", style="bold")
     table.add_column("MOS%", justify="right", style="bold")
-    table.add_column("Rating", justify="center")
+    table.add_column("Rating", justify="left")
     table.add_column("F-Score", justify="center")
     
     for idx, stock in enumerate(results, 1):
@@ -402,7 +402,7 @@ def graham_value(
             f"₹{stock['intrinsic']:.2f}",
             f"[{mos_color}]{stock['mos_pct']:.1f}%[/{mos_color}]",
             stock["rating"],
-            f"{stock['fscore']}/8"
+            f"{stock['fscore']}/12"
         )
     
     console.print()
@@ -421,7 +421,7 @@ def graham_value(
     summary = Panel(
         f"[bold]Method:[/bold] {method}\n"
         f"[bold]Average MOS:[/bold] {avg_mos:.1f}%\n"
-        f"[bold]Average F-Score:[/bold] {avg_fscore:.1f}/8\n\n"
+        f"[bold]Average F-Score:[/bold] {avg_fscore:.1f}/12\n\n"
         f"[bold green]STRONG VALUE (≥50%):[/bold green] {strong_value} stocks\n"
         f"[bold cyan]EXCELLENT VALUE (40-50%):[/bold cyan] {excellent_value} stocks\n"
         f"[bold yellow]GOOD VALUE (30-40%):[/bold yellow] {good_value} stocks",

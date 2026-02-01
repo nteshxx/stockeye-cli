@@ -5,14 +5,13 @@ import pandas as pd
 from stockeye.services.data_fetcher import fetch_stock
 from stockeye.core.indicators import (
     add_dma, add_rsi, add_macd, analyze_volume,
-    detect_cross_age, get_rsi_signal, get_macd_signal, get_volume_signal
+    add_bollinger_bands, add_supertrend, add_adx,
+    detect_cross_age, get_rsi_signal, get_macd_signal, get_volume_signal,
+    get_bollinger_signal, get_supertrend_signal, get_adx_signal,
+    fetch_india_vix, detect_market_regime
 )
 from stockeye.core.margin_of_safety import (
-    calculate_growth,
-    intrinsic_value,
-    margin_of_safety,
-    graham_rating,
-    conservative_intrinsic_value
+    margin_of_safety, graham_rating, conservative_intrinsic_value, intrinsic_value
 )
 from stockeye.core.fundamentals import fundamental_score
 from stockeye.core.rating import rating, get_rating_score
@@ -69,85 +68,52 @@ def get_stock_index(index="NIFTY_50"):
         return []
 
 
-def analyze_stock(symbol, period="1y"):
+def scan_for_graham_value(index="NIFTY_50", limit=50, min_mos=30, conservative=False):
     """
-    Analyze a single stock and return all metrics with comprehensive null safety
+    Scan for Graham-style value stocks (Margin of Safety analysis) with null safety
+    
+    Args:
+        index: Stock index to scan
+        limit: Maximum number of results
+        min_mos: Minimum Margin of Safety percentage
+        conservative: Use conservative valuation method
     
     Returns:
-        dict or None: Stock analysis data or None if error
+        list: Value stocks sorted by MOS percentage
     """
+    symbols = get_stock_index(index)
+    results = []
+    
+    for symbol in symbols:
+        value_data = analyze_stock_mos_value(symbol, period="5y", conservative=conservative)
+        if value_data and value_data.get("mos_pct", 0) >= min_mos:
+            results.append(value_data)
+    
+    # Sort by MOS percentage (descending)
+    results.sort(key=lambda x: x.get("mos_pct", 0), reverse=True)
+    
+    return results[:limit]
+
+
+def safe_get(data, key, default=None):
+    if data is None: return default
     try:
-        df, info = fetch_stock(symbol, period)
-        
-        if df is None or info is None or len(df) < 50:
-            return None
-        
-        # Add all indicators
-        df = add_dma(df, 50, 200)
-        df = add_rsi(df)
-        df = add_macd(df)
-        df = analyze_volume(df)
-        
-        if df is None or df.empty:
-            return None
-        
-        last = df.iloc[-1]
-        fscore = fundamental_score(info)
-        
-        # Get indicator signals with null safety
-        rsi = safe_get(last, "RSI")
-        rsi_signal = get_rsi_signal(rsi)
-        
-        macd_val = safe_get(last, "MACD")
-        macd_sig = safe_get(last, "MACD_Signal")
-        macd_hist = safe_get(last, "MACD_Hist")
-        macd_signal = get_macd_signal(macd_val, macd_sig, macd_hist)
-        
-        volume_ratio = safe_get(last, "Volume_Ratio")
-        volume_signal = get_volume_signal(volume_ratio)
-        
-        # Detect cross
-        cross_info = detect_cross_age(df)
-        if cross_info is None:
-            cross_info = {'type': None, 'days_ago': None, 'cross_price': None}
-        
-        # Get values with null safety
-        close_price = safe_float(safe_get(last, "Close"))
-        dma50_val = safe_float(safe_get(last, "DMA50"))
-        dma200_val = safe_float(safe_get(last, "DMA200"))
-        
-        # Generate rating
-        stock_rating = rating(
-            close_price,
-            dma50_val,
-            dma200_val,
-            fscore,
-            cross_info,
-            rsi,
-            macd_signal,
-            volume_signal
-        )
-        
-        return {
-            "symbol": symbol,
-            "price": close_price,
-            "dma50": dma50_val,
-            "dma200": dma200_val,
-            "rsi": rsi,
-            "rsi_signal": rsi_signal,
-            "macd_signal": macd_signal,
-            "volume_signal": volume_signal,
-            "fscore": fscore,
-            "cross_info": cross_info,
-            "rating": stock_rating,
-            "rating_score": get_rating_score(stock_rating),
-            "market_cap": safe_int(info.get("marketCap", 0)),
-            "company_name": info.get("longName", symbol)
-        }
-        
-    except Exception as e:
-        print(f"Error analyzing {symbol}: {str(e)}")
-        return None
+        return data.get(key, default)
+    except: return default
+
+def safe_float(value, default=0.0):
+    try: return float(value)
+    except: return default
+
+def safe_int(value, default=0):
+    try: return int(value)
+    except: return default
+
+def get_stock_index(index="NIFTY_50"):
+    try:
+        return load_nse_data(index.upper())
+    except:
+        return []
 
 
 def analyze_stock_mos_value(symbol, period="5y", conservative=False):
@@ -220,120 +186,166 @@ def analyze_stock_mos_value(symbol, period="5y", conservative=False):
         return None
 
 
+def analyze_stock(symbol, period="1y", vix_value=None, market_regime=None):
+    """
+    Analyze a single stock with enhanced indicators
+    """
+    try:
+        df, info = fetch_stock(symbol, period)
+        
+        if df is None or info is None or len(df) < 50:
+            return None
+        
+        # Add all indicators
+        df = add_dma(df, 50, 200)
+        df = add_rsi(df)
+        df = add_macd(df)
+        df = analyze_volume(df)
+        df = add_bollinger_bands(df)
+        df = add_supertrend(df)
+        df = add_adx(df)
+        
+        if df is None or df.empty:
+            return None
+        
+        last = df.iloc[-1]
+        fscore = fundamental_score(info) # 0-12 scale
+        
+        # Extract Signals
+        rsi = safe_get(last, "RSI")
+        rsi_signal = get_rsi_signal(rsi)
+        
+        macd_val = safe_get(last, "MACD")
+        macd_sig = safe_get(last, "MACD_Signal")
+        macd_hist = safe_get(last, "MACD_Hist")
+        macd_signal = get_macd_signal(macd_val, macd_sig, macd_hist)
+        
+        volume_ratio = safe_get(last, "Volume_Ratio")
+        volume_signal = get_volume_signal(volume_ratio)
+
+        bb_pos = safe_get(last, "BB_Position")
+        bb_signal = get_bollinger_signal(bb_pos)
+
+        st_val = safe_get(last, "Supertrend")
+        st_dir = safe_get(last, "Supertrend_Direction")
+        st_signal = get_supertrend_signal(safe_get(last, "Close"), st_val, st_dir)
+
+        adx_val = safe_get(last, "ADX")
+        adx_signal = get_adx_signal(adx_val)
+        
+        # Detect cross
+        cross_info = detect_cross_age(df)
+        if cross_info is None:
+            cross_info = {'type': None, 'days_ago': None, 'cross_price': None}
+        
+        close_price = safe_float(safe_get(last, "Close"))
+        dma50_val = safe_float(safe_get(last, "DMA50"))
+        dma200_val = safe_float(safe_get(last, "DMA200"))
+        
+        # Fetch context if not provided (rarely used in loops to save time)
+        if vix_value is None:
+            vix_value = fetch_india_vix()
+
+        # Generate enhanced rating
+        stock_rating = rating(
+            close_price, dma50_val, dma200_val, fscore, cross_info,
+            rsi, macd_signal, volume_signal, bb_signal, st_signal, adx_signal,
+            vix_value, market_regime
+        )
+        
+        return {
+            "symbol": symbol,
+            "price": close_price,
+            "dma50": dma50_val,
+            "dma200": dma200_val,
+            "rsi": rsi,
+            "rsi_signal": rsi_signal,
+            "macd_signal": macd_signal,
+            "volume_signal": volume_signal,
+            "bb_signal": bb_signal,
+            "supertrend_signal": st_signal,
+            "adx_signal": adx_signal,
+            "fscore": fscore,
+            "cross_info": cross_info,
+            "rating": stock_rating,
+            "rating_score": get_rating_score(stock_rating),
+            "market_cap": safe_int(info.get("marketCap", 0)),
+            "company_name": info.get("longName", symbol)
+        }
+        
+    except Exception as e:
+        print(f"Error analyzing {symbol}: {str(e)}")
+        return None
+
+
 def scan_for_strong_buys(index="NIFTY_50", limit=50, period="1y"):
     """
-    Scan for top STRONG BUY stocks with null safety
-    
-    Args:
-        index: Stock index to scan
-        limit: Maximum number of results
-        period: Data period
-    
-    Returns:
-        list: Top strong buy stocks sorted by rating score
+    Scan for top STRONG BUY/BUY stocks using enhanced logic
     """
     symbols = get_stock_index(index)
     results = []
     
+    # Fetch market context once
+    vix = fetch_india_vix()
+    try:
+        nifty, _ = fetch_stock("^NSEI", "1y")
+        regime = detect_market_regime(nifty)
+    except:
+        regime = "UNKNOWN"
+
     for symbol in symbols:
-        stock_data = analyze_stock(symbol, period)
-        if stock_data and stock_data.get("rating_score", 0) >= 6:  # BUY or STRONG BUY
+        stock_data = analyze_stock(symbol, period, vix, regime)
+        # Score >= 6 corresponds to BUY and STRONG BUY
+        if stock_data and stock_data.get("rating_score", 0) >= 6:
             results.append(stock_data)
     
-    # Sort by rating score (descending), then by fscore
+    # Sort by rating score (desc) then fscore (desc)
     results.sort(key=lambda x: (x.get("rating_score", 0), x.get("fscore", 0)), reverse=True)
-    
     return results[:limit]
 
 
 def scan_for_fundamentally_strong(index="NIFTY_50", limit=50, period="1y"):
     """
-    Scan for fundamentally strong stocks (high F-Score) with null safety
-    
-    Args:
-        index: Stock index to scan
-        limit: Maximum number of results
-        period: Data period
-    
-    Returns:
-        list: Top fundamental stocks sorted by F-Score
+    Scan for fundamentally strong stocks (F-Score >= 8 out of 12)
     """
     symbols = get_stock_index(index)
     results = []
     
+    # Fetch VIX once
+    vix = fetch_india_vix()
+
     for symbol in symbols:
-        stock_data = analyze_stock(symbol, period)
-        if stock_data and stock_data.get("fscore", 0) >= 5:  # Good fundamentals
+        stock_data = analyze_stock(symbol, period, vix_value=vix)
+        # Threshold updated for 12-point scale (approx 66% quality)
+        if stock_data and stock_data.get("fscore", 0) >= 8:
             results.append(stock_data)
     
-    # Sort by fscore (descending), then by rating score
     results.sort(key=lambda x: (x.get("fscore", 0), x.get("rating_score", 0)), reverse=True)
-    
     return results[:limit]
 
 
 def scan_for_value_opportunities(index="NIFTY_50", limit=50, period="1y"):
     """
-    Scan for value opportunities (strong fundamentals but temporarily weak price)
-    with null safety
-    
-    Args:
-        index: Stock index to scan
-        limit: Maximum number of results
-        period: Data period
-    
-    Returns:
-        list: Value opportunity stocks
+    Scan for value: High F-Score (>8) but low RSI or ADD/BUY rating
     """
     symbols = get_stock_index(index)
     results = []
-    
+    vix = fetch_india_vix()
+
     for symbol in symbols:
-        stock_data = analyze_stock(symbol, period)
+        stock_data = analyze_stock(symbol, period, vix_value=vix)
         if stock_data:
             fscore = stock_data.get("fscore", 0)
             rsi = stock_data.get("rsi")
-            stock_rating = stock_data.get("rating", "")
+            rating_str = stock_data.get("rating", "")
             
-            # Strong fundamentals (≥6) but oversold or ADD rating
-            if fscore >= 6:
-                if (rsi is not None and rsi < 40) or stock_rating in ["ADD 🔵", "BUY 🟢"]:
+            # Updated threshold: F-Score >= 8 (Good quality)
+            if fscore >= 8:
+                if (rsi is not None and rsi < 40) or "ADD" in rating_str or "BUY" in rating_str:
                     results.append(stock_data)
     
-    # Sort by fscore, prioritizing oversold conditions
     def sort_key(x):
-        fscore = x.get("fscore", 0)
-        rsi = x.get("rsi")
-        rsi_val = -rsi if rsi is not None else 0
-        return (fscore, rsi_val)
+        return (x.get("fscore", 0), -(x.get("rsi") or 0))
     
     results.sort(key=sort_key, reverse=True)
-    
-    return results[:limit]
-
-
-def scan_for_graham_value(index="NIFTY_50", limit=50, min_mos=30, conservative=False):
-    """
-    Scan for Graham-style value stocks (Margin of Safety analysis) with null safety
-    
-    Args:
-        index: Stock index to scan
-        limit: Maximum number of results
-        min_mos: Minimum Margin of Safety percentage
-        conservative: Use conservative valuation method
-    
-    Returns:
-        list: Value stocks sorted by MOS percentage
-    """
-    symbols = get_stock_index(index)
-    results = []
-    
-    for symbol in symbols:
-        value_data = analyze_stock_mos_value(symbol, period="5y", conservative=conservative)
-        if value_data and value_data.get("mos_pct", 0) >= min_mos:
-            results.append(value_data)
-    
-    # Sort by MOS percentage (descending)
-    results.sort(key=lambda x: x.get("mos_pct", 0), reverse=True)
-    
     return results[:limit]

@@ -169,7 +169,8 @@ def analyze(
     table = Table(
         title=f"🛡️ Margin of Safety Analysis - Graham Method ({len(results)} stocks)",
         show_header=True,
-        header_style="bold green"
+        header_style="bold green",
+        show_lines=True,
     )
     
     table.add_column("#", justify="right", style="dim")

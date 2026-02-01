@@ -25,7 +25,7 @@ app.add_typer(mos_app, name="mos")
 @app.command()
 def version():
     """
-    Show StockEye version information
+    ℹ️ Show StockEye version information
     """
     console.print(Panel.fit(
         f"[bold cyan]{__app_name__}[/bold cyan] version [green]{__version__}[/green]\n\n"
@@ -43,7 +43,7 @@ def show_help(
     command: str = typer.Argument(None, help="Command to get help for")
 ):
     """
-    Show detailed help for commands
+    📖 Show detailed help for commands
     """
     if command is None:
         console.print("""

@@ -17,8 +17,10 @@ packages = [
   "stockeye",
   "stockeye.commands",
   "stockeye.core",
-  "stockeye.services",
   "stockeye.data",
+  "stockeye.scanners",
+  "stockeye.services",
+  "stockeye.utils",
 ]
 
 [tool.setuptools.package-data]

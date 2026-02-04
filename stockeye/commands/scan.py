@@ -1,67 +1,19 @@
 import typer
 import time
+
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from stockeye.services.scanner import (
-    scan_for_strong_buys,
-    scan_for_fundamentally_strong,
-    scan_for_value_opportunities,
-    scan_for_graham_value,
-    get_stock_index
-)
 from stockeye.core.rating import get_cross_display
 from stockeye.storage import add_symbols
+from stockeye.scanners.graham_value_scanner import scan_for_graham_value
+from stockeye.scanners.strong_buys_scanner import scan_for_strong_buys
+from stockeye.scanners.strong_fundamental_scanner import scan_for_fundamentally_strong
+from stockeye.utils.formatters import format_macd, format_market_cap, format_rsi, format_time
 
 scan_app = typer.Typer(help="🔍 Scan markets for opportunities")
 console = Console()
-
-def format_market_cap(market_cap):
-    """Format market cap in billions/trillions"""
-    if market_cap >= 1_000_000_000_000:  # Trillion
-        return f"${market_cap / 1_000_000_000_000:.2f}T"
-    elif market_cap >= 1_000_000_000:  # Billion
-        return f"${market_cap / 1_000_000_000:.2f}B"
-    elif market_cap >= 1_000_000:  # Million
-        return f"${market_cap / 1_000_000:.2f}M"
-    else:
-        return f"${market_cap:,.0f}"
-
-
-def format_rsi_compact(rsi, rsi_signal):
-    """Compact RSI display"""
-    if rsi is None:
-        return "N/A"
-    
-    if rsi_signal == "OVERSOLD":
-        return f"[green]{rsi:.0f}↓[/green]"
-    elif rsi_signal == "OVERBOUGHT":
-        return f"[red]{rsi:.0f}↑[/red]"
-    else:
-        return f"{rsi:.0f}"
-
-
-def format_macd_compact(macd_signal):
-    """Compact MACD display"""
-    if macd_signal == "BULLISH":
-        return "[green]↑[/green]"
-    elif macd_signal == "BEARISH":
-        return "[red]↓[/red]"
-    else:
-        return "→"
-
-
-def format_time(seconds):
-    """Format execution time in a human-readable way"""
-    if seconds < 1:
-        return f"{seconds*1000:.0f}ms"
-    elif seconds < 60:
-        return f"{seconds:.2f}s"
-    else:
-        minutes = int(seconds // 60)
-        secs = seconds % 60
-        return f"{minutes}m {secs:.1f}s"
 
 
 @scan_app.command("strong-buys")
@@ -132,8 +84,8 @@ def strong_buys(
             stock["company_name"],
             f"{stock['price']:.2f}",
             f"{stock['fscore']}/12",
-            format_rsi_compact(stock["rsi"], stock["rsi_signal"]),
-            format_macd_compact(stock["macd_signal"]),
+            format_rsi(stock["rsi"], stock["rsi_signal"]),
+            format_macd(stock["macd_signal"]),
             cross_display,
             stock["rating"],
             format_market_cap(stock["market_cap"])
@@ -162,7 +114,7 @@ def strong_buys(
         console.print(f"\n[green]✓[/green] Added {len(added)} symbols to watchlist")
 
 
-@scan_app.command("fundamentals")
+@scan_app.command("strong-fundamentals")
 def fundamentals(
     index: str = typer.Option("NIFTY_50", "--index", "-i", help="Stock index"),
     limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
@@ -231,8 +183,8 @@ def fundamentals(
             stock["company_name"],
             f"{stock['fscore']}/12",
             f"{stock['price']:.2f}",
-            format_rsi_compact(stock["rsi"], stock["rsi_signal"]),
-            format_macd_compact(stock["macd_signal"]),
+            format_rsi(stock["rsi"], stock["rsi_signal"]),
+            format_macd(stock["macd_signal"]),
             stock["rating"],
             format_market_cap(stock["market_cap"])
         )
@@ -260,98 +212,13 @@ def fundamentals(
         console.print(f"\n[green]✓[/green] Added {len(added)} symbols to watchlist")
 
 
-@scan_app.command("value")
-def value_opportunities(
-    index: str = typer.Option("NIFTY_50", "--index", "-i", help="Stock index"),
-    limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
-    export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
-):
-    """
-    Scan for value opportunities
-    
-    Finds stocks with:
-    - Strong fundamentals (F-Score ≥ 6)
-    - Temporarily weak prices (oversold or ADD ratings)
-    - Potential mean reversion opportunities
-    """
-    start_time = time.time()
-    
-    console.print(Panel.fit(
-        f"[cyan]Scanning {index} for value opportunities...[/cyan]",
-        title="💰 Value Scanner"
-    ))
-    
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        console=console
-    ) as progress:
-        task = progress.add_task(f"[cyan]Finding value stocks...", total=100)
-        
-        results = scan_for_value_opportunities(index, limit)
-        progress.update(task, completed=100)
-    
-    scan_time = time.time() - start_time
-    
-    if not results:
-        console.print("[yellow]No value opportunities found[/yellow]")
-        console.print(f"\n[dim]⏱️  Scan completed in {format_time(scan_time)}[/dim]")
-        return
-    
-    # Create results table
-    table = Table(
-        title=f"💰 Top {len(results)} Value Opportunities",
-        show_header=True,
-        header_style="bold blue",
-        show_lines=True,
-    )
-    
-    table.add_column("#", justify="right", style="dim")
-    table.add_column("Symbol", style="cyan")
-    table.add_column("Company", style="dim", max_width=25)
-    table.add_column("F-Score", justify="center", style="bold")
-    table.add_column("Price", justify="right")
-    table.add_column("RSI", justify="center")
-    table.add_column("Rating", justify="left")
-    table.add_column("Mkt Cap", justify="right", style="dim")
-    
-    for idx, stock in enumerate(results, 1):
-        table.add_row(
-            str(idx),
-            stock["symbol"],
-            stock["company_name"],
-            f"{stock['fscore']}/12",
-            f"{stock['price']:.2f}",
-            format_rsi_compact(stock["rsi"], stock["rsi_signal"]),
-            stock["rating"],
-            format_market_cap(stock["market_cap"])
-        )
-    
-    console.print()
-    console.print(table)
-    console.print()
-    
-    console.print(Panel(
-        "[yellow]Value stocks are fundamentally strong but temporarily weak.[/yellow]\n"
-        "These represent potential buy-the-dip opportunities.\n"
-        "Always do your own research before investing!\n\n"
-        f"[dim]⏱️  Scan time: {format_time(scan_time)}[/dim]",
-        title="💡 Value Investing Note",
-        border_style="blue"
-    ))
-    
-    if export:
-        symbols = [s["symbol"] for s in results]
-        added = add_symbols(symbols)
-        console.print(f"\n[green]✓[/green] Added {len(added)} symbols to watchlist")
-
-@scan_app.command("mos")
+@scan_app.command("graham-value")
 def graham_value(
     index: str = typer.Option("NIFTY_50", "--index", "-u", help="Stock index (NIFTY_50, NIFTY_500, etc)"),
     limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
     min_mos: float = typer.Option(30, "--min-mos", "-m", help="Minimum Margin of Safety %"),
     conservative: bool = typer.Option(False, "--conservative", "-c", help="Use conservative valuation"),
+    batch_size: int = typer.Option(50, "--batch-size", "-b", help="Use batch size"),
     export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
 ):
     """
@@ -379,7 +246,7 @@ def graham_value(
     ) as progress:
         task = progress.add_task(f"[cyan]Calculating intrinsic values...", total=100)
         
-        results = scan_for_graham_value(index, limit, min_mos, conservative)
+        results = scan_for_graham_value(index, limit, min_mos, conservative, batch_size)
         progress.update(task, completed=100)
     
     scan_time = time.time() - start_time
@@ -486,4 +353,3 @@ def graham_value(
             console.print(f"\n[green]✓[/green] Exported {len(added)} stocks with MOS ≥40% to watchlist")
         else:
             console.print(f"\n[yellow]⚠[/yellow] No stocks with MOS ≥40% to export (threshold too high)")
-

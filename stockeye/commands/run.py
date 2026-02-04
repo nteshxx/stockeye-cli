@@ -4,31 +4,15 @@ from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from stockeye.services.analyzer import analyze_symbol
+from stockeye.services.analyzer import analyze_stock
 from stockeye.services.data_fetcher import fetch_stock
 from stockeye.storage import load_watchlist
 from stockeye.config import MAX_WORKERS
 from stockeye.core.rating import get_cross_display
 from stockeye.core.indicators import fetch_india_vix, detect_market_regime
+from stockeye.utils.formatters import format_macd, format_rsi, format_volume
 
 console = Console()
-
-def format_rsi(rsi, rsi_signal):
-    """Format RSI display"""
-    if rsi is None or rsi_signal is None: return "N/A"
-    if rsi_signal == "OVERSOLD": return f"[green bold]{rsi:.0f} ↓[/green bold]" # Rounded for space
-    elif rsi_signal == "OVERBOUGHT": return f"[red]{rsi:.0f} ↑[/red]"
-    return f"[yellow]{rsi:.0f}[/yellow]"
-
-def format_macd(macd_signal):
-    if macd_signal == "BULLISH": return "[green]BULL[/green]"
-    elif macd_signal == "BEARISH": return "[red]BEAR[/red]"
-    return "[dim]-[/dim]"
-
-def format_volume(volume_signal):
-    if volume_signal == "HIGH": return "[green bold]HIGH[/green bold]"
-    elif volume_signal == "LOW": return "[red]LOW[/red]"
-    return "[dim]-[/dim]"
 
 def run(detailed=False):
     symbols = load_watchlist()
@@ -87,7 +71,7 @@ def run(detailed=False):
         
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
             future_to_sym = {
-                executor.submit(analyze_symbol, sym, vix, regime): sym 
+                executor.submit(analyze_stock, sym, vix, regime): sym 
                 for sym in symbols
             }
             

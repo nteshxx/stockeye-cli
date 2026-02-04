@@ -72,15 +72,14 @@ def show_help(
 
 [bold cyan]🔍 MARKET SCANNING:[/bold cyan]
 
-  [yellow]stockeye scan strong-buys[/yellow]     Find top STRONG BUY opportunities
-  [yellow]stockeye scan fundamentals[/yellow]    Find strong F-Score stocks (≥5)
-  [yellow]stockeye scan value[/yellow]           Find value opportunities
-  [yellow]stockeye scan mos[/yellow]             Find Graham value stocks
+  [yellow]stockeye scan strong-buys[/yellow]             Find top STRONG BUY opportunities
+  [yellow]stockeye scan strong-fundamentals[/yellow]     Find strong F-Score stocks (≥9)
+  [yellow]stockeye scan graham-value[/yellow]            Find Graham value stocks
 
 [bold cyan]💎 VALUE INVESTING (Graham Method):[/bold cyan]
 
-  [yellow]stockeye mos analyze[/yellow]          Margin of Safety on watchlist
-  [yellow]stockeye mos scan SYMBOL[/yellow]      Quick Graham analysis
+  [yellow]stockeye mos analyze[/yellow]             Margin of Safety on watchlist
+  [yellow]stockeye mos inspect SYMBOL[/yellow]      Quick Graham analysis
   
 [bold cyan]📋 WATCHLIST MANAGEMENT:[/bold cyan]
 
@@ -115,11 +114,11 @@ def show_help(
 
   # Market scanning with filters
   [blue]stockeye scan strong-buys --index NIFTY_500 --limit 20[/blue]
-  [blue]stockeye scan fundamentals --min-score 7[/blue]
+  [blue]stockeye scan strong-fundamentals --min-score 7[/blue]
   
   # Graham value analysis
-  [blue]stockeye scan mos --min-mos 40 --conservative[/blue]
-  [blue]stockeye mos scan RELIANCE.NS[/blue]
+  [blue]stockeye scan graham-value --min-mos 40 --conservative[/blue]
+  [blue]stockeye mos inspect RELIANCE.NS[/blue]
   
   # Watchlist workflow
   [blue]stockeye watch add HDFCBANK.NS ICICIBANK.NS[/blue]
@@ -193,12 +192,7 @@ Scan entire market indices for trading opportunities.
      --index, -i     Index to scan
      --export, -e    Export to watchlist
 
-3. [green]stockeye scan value[/green]
-   Find quality stocks with temporary weakness
-   
-   Criteria: F-Score ≥6 + (RSI <40 OR ADD rating)
-
-4. [green]stockeye scan mos[/green]
+3. [green]stockeye scan graham-value[/green]
    Graham-style value screening (Margin of Safety)
    
    Options:
@@ -208,8 +202,8 @@ Scan entire market indices for trading opportunities.
 
 [yellow]Examples:[/yellow]
   stockeye scan strong-buys --index NIFTY_500
-  stockeye scan fundamentals --min-score 7 --export
-  stockeye scan mos --min-mos 40 --conservative
+  stockeye scan strong-fundamentals --min-score 7 --export
+  stockeye scan graham-value --min-mos 40 --conservative
         """)
     
     elif command == "mos":
@@ -228,7 +222,7 @@ Value investing analysis based on Benjamin Graham's principles.
      --conservative, -c Ultra-conservative valuation
      --export, -e       Export results to watchlist
 
-2. [green]stockeye mos scan SYMBOL[/green]
+2. [green]stockeye mos inspect SYMBOL[/green]
    Quick Graham analysis for single stock
    
    Shows:
@@ -255,7 +249,7 @@ Value investing analysis based on Benjamin Graham's principles.
 
 [yellow]Examples:[/yellow]
   stockeye mos analyze --min-mos 40
-  stockeye mos scan RELIANCE.NS
+  stockeye mos inspect RELIANCE.NS
   stockeye mos analyze --conservative --export
         """)
     

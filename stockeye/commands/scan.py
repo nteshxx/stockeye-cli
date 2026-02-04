@@ -1,4 +1,5 @@
 import typer
+import time
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -51,6 +52,18 @@ def format_macd_compact(macd_signal):
         return "→"
 
 
+def format_time(seconds):
+    """Format execution time in a human-readable way"""
+    if seconds < 1:
+        return f"{seconds*1000:.0f}ms"
+    elif seconds < 60:
+        return f"{seconds:.2f}s"
+    else:
+        minutes = int(seconds // 60)
+        secs = seconds % 60
+        return f"{minutes}m {secs:.1f}s"
+
+
 @scan_app.command("strong-buys")
 def strong_buys(
     index: str = typer.Option("NIFTY_50", "--index", "-i", help="Stock index (NIFTY_50, NIFTY_500, NIFTY_NEXT_50)"),
@@ -66,6 +79,8 @@ def strong_buys(
     - Fresh golden crosses
     - Oversold bounces with momentum
     """
+    start_time = time.time()
+    
     console.print(Panel.fit(
         f"[cyan]Scanning {index} index for STRONG BUY opportunities...[/cyan]",
         title="🔍 Market Scanner"
@@ -82,8 +97,11 @@ def strong_buys(
         results = scan_for_strong_buys(index, limit)
         progress.update(task, completed=100)
     
+    scan_time = time.time() - start_time
+    
     if not results:
         console.print("[yellow]No STRONG BUY stocks found in current market conditions[/yellow]")
+        console.print(f"\n[dim]⏱️  Scan completed in {format_time(scan_time)}[/dim]")
         return
     
     # Create results table
@@ -131,7 +149,8 @@ def strong_buys(
     
     summary = Panel(
         f"[green]STRONG BUY:[/green] {strong_buy_count} stocks\n"
-        f"[cyan]BUY:[/cyan] {buy_count} stocks",
+        f"[cyan]BUY:[/cyan] {buy_count} stocks\n\n"
+        f"[dim]⏱️  Scan time: {format_time(scan_time)}[/dim]",
         title="📊 Summary",
         border_style="green"
     )
@@ -159,6 +178,8 @@ def fundamentals(
     - Strong Revenue Growth (>10%)
     - Good Profit Margins (>10%)
     """
+    start_time = time.time()
+    
     console.print(Panel.fit(
         f"[cyan]Scanning {index} for fundamentally strong stocks (F-Score ≥ {min_score})...[/cyan]",
         title="💎 Fundamental Scanner"
@@ -175,11 +196,14 @@ def fundamentals(
         results = scan_for_fundamentally_strong(index, limit)
         progress.update(task, completed=100)
     
+    scan_time = time.time() - start_time
+    
     # Filter by minimum score
     results = [r for r in results if r["fscore"] >= min_score]
     
     if not results:
         console.print(f"[yellow]No stocks found with F-Score ≥ {min_score}[/yellow]")
+        console.print(f"\n[dim]⏱️  Scan completed in {format_time(scan_time)}[/dim]")
         return
     
     # Create results table
@@ -223,7 +247,8 @@ def fundamentals(
     
     summary = Panel(
         f"[green]Perfect Score (12/12):[/green] {perfect_score} stocks\n"
-        f"[cyan]Excellent (≥9/12):[/cyan] {excellent_score} stocks",
+        f"[cyan]Excellent (≥9/12):[/cyan] {excellent_score} stocks\n\n"
+        f"[dim]⏱️  Scan time: {format_time(scan_time)}[/dim]",
         title="📊 Fundamental Quality",
         border_style="magenta"
     )
@@ -249,6 +274,8 @@ def value_opportunities(
     - Temporarily weak prices (oversold or ADD ratings)
     - Potential mean reversion opportunities
     """
+    start_time = time.time()
+    
     console.print(Panel.fit(
         f"[cyan]Scanning {index} for value opportunities...[/cyan]",
         title="💰 Value Scanner"
@@ -265,8 +292,11 @@ def value_opportunities(
         results = scan_for_value_opportunities(index, limit)
         progress.update(task, completed=100)
     
+    scan_time = time.time() - start_time
+    
     if not results:
         console.print("[yellow]No value opportunities found[/yellow]")
+        console.print(f"\n[dim]⏱️  Scan completed in {format_time(scan_time)}[/dim]")
         return
     
     # Create results table
@@ -305,7 +335,8 @@ def value_opportunities(
     console.print(Panel(
         "[yellow]Value stocks are fundamentally strong but temporarily weak.[/yellow]\n"
         "These represent potential buy-the-dip opportunities.\n"
-        "Always do your own research before investing!",
+        "Always do your own research before investing!\n\n"
+        f"[dim]⏱️  Scan time: {format_time(scan_time)}[/dim]",
         title="💡 Value Investing Note",
         border_style="blue"
     ))
@@ -332,6 +363,8 @@ def graham_value(
     - Based on EPS and growth rate
     - Graham's formula: EPS × (8.5 + 2g)
     """
+    start_time = time.time()
+    
     console.print(Panel.fit(
         f"[cyan]Scanning {index} for Graham value stocks (MOS ≥ {min_mos}%)...[/cyan]\n"
         f"[dim]Method: {'Conservative' if conservative else 'Standard Graham'}[/dim]",
@@ -349,6 +382,8 @@ def graham_value(
         results = scan_for_graham_value(index, limit, min_mos, conservative)
         progress.update(task, completed=100)
     
+    scan_time = time.time() - start_time
+    
     if not results:
         console.print()
         console.print(Panel(
@@ -356,7 +391,8 @@ def graham_value(
             "Try:\n"
             "• Lowering threshold: [cyan]--min-mos 20[/cyan]\n"
             "• Different index: [cyan]--index NIFTY_500[/cyan]\n"
-            "• Standard method: [cyan]Remove --conservative flag[/cyan]",
+            "• Standard method: [cyan]Remove --conservative flag[/cyan]\n\n"
+            f"[dim]⏱️  Scan time: {format_time(scan_time)}[/dim]",
             title="📊 No Value Opportunities Found",
             border_style="yellow"
         ))
@@ -421,10 +457,11 @@ def graham_value(
     summary = Panel(
         f"[bold]Method:[/bold] {method}\n"
         f"[bold]Average MOS:[/bold] {avg_mos:.1f}%\n"
-        f"[bold]Average F-Score:[/bold] {avg_fscore:.1f}/12\n\n"
+        f"[bold]Average F-Score:[/bold] {avg_fscore:.1f}/12\n"
         f"[bold green]STRONG VALUE (≥50%):[/bold green] {strong_value} stocks\n"
         f"[bold cyan]EXCELLENT VALUE (40-50%):[/bold cyan] {excellent_value} stocks\n"
-        f"[bold yellow]GOOD VALUE (30-40%):[/bold yellow] {good_value} stocks",
+        f"[bold yellow]GOOD VALUE (30-40%):[/bold yellow] {good_value} stocks\n\n"
+        f"[dim]⏱️  Scan time: {format_time(scan_time)}[/dim]",
         title="📊 Graham Value Summary",
         border_style="green"
     )
@@ -449,3 +486,4 @@ def graham_value(
             console.print(f"\n[green]✓[/green] Exported {len(added)} stocks with MOS ≥40% to watchlist")
         else:
             console.print(f"\n[yellow]⚠[/yellow] No stocks with MOS ≥40% to export (threshold too high)")
+

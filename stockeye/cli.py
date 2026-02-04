@@ -109,6 +109,7 @@ def show_help(
   NIFTY_NEXT_50       - Next 50 stocks
   NIFTY_MIDCAP_100    - Top 100 Midcap stocks
   NIFTY_SMALLCAP_100  - Top 100 Smallcap stocks
+  NIFTY_TOTAL_MARKET  - Top 750 stocks
 
 [bold cyan]💡 EXAMPLES:[/bold cyan]
 

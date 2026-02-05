@@ -1,6 +1,9 @@
-from stockeye.core.indicators import fetch_india_vix
+from stockeye.config import PERIOD
+from stockeye.core.indicators import detect_market_regime, fetch_india_vix
 from stockeye.data.load_data import load_nse_symbols
 from stockeye.services.analyzer import analyze_stock
+from stockeye.services.data_fetcher import clear_expired_cache, fetch_stock, fetch_stock_batch
+from stockeye.utils.utilities import safe_get
 
 
 def scan_for_fundamentally_strong(index="NIFTY_50", limit=50, period="1y"):
@@ -9,15 +12,30 @@ def scan_for_fundamentally_strong(index="NIFTY_50", limit=50, period="1y"):
     """
     results = []
     symbols = load_nse_symbols(index)
-    
-    # Fetch VIX once
-    vix = fetch_india_vix()
+    symbols = sorted(symbols)
+    total_symbols = len(symbols)
+    batch_size=50
 
-    for symbol in symbols:
-        stock_data = analyze_stock(symbol, period, vix_value=vix)
-        # Threshold updated for 12-point scale (approx 66% quality)
-        if stock_data and stock_data.get("fscore", 0) >= 8:
-            results.append(stock_data)
+    clear_expired_cache()
+    
+    # Fetch market context once
+    vix = fetch_india_vix()
+    try:
+        nifty, _ = fetch_stock("^NSEI", "1y")
+        regime = detect_market_regime(nifty)
+    except:
+        regime = "UNKNOWN"
+
+    for i in range(0, total_symbols, batch_size):
+        current_batch = symbols[i : i + batch_size]
+        stock_data = fetch_stock_batch(current_batch, period=PERIOD)
+        
+        for symbol in current_batch:
+            df, info = safe_get(stock_data, symbol)
+            analyzed_stock = analyze_stock(symbol, df, info, vix, regime)
+            # Fundamental score >= 9 corresponds to Strong Fundamentals
+            if analyzed_stock and safe_get(analyzed_stock, "fscore", 0) >= 9:
+                results.append(analyzed_stock)
     
     results.sort(key=lambda x: (x.get("fscore", 0), x.get("rating_score", 0)), reverse=True)
     return results[:limit]

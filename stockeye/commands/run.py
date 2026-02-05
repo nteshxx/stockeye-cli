@@ -2,12 +2,11 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from stockeye.services.analyzer import analyze_stock
-from stockeye.services.data_fetcher import fetch_stock
-from stockeye.storage import load_watchlist
-from stockeye.config import MAX_WORKERS
+from stockeye.services.data_fetcher import clear_expired_cache, fetch_stock
+from stockeye.services.watchlist_manager import load_watchlist
+from stockeye.config import MAX_WORKERS, PERIOD
 from stockeye.core.rating import get_cross_display
 from stockeye.core.indicators import fetch_india_vix, detect_market_regime
 from stockeye.utils.formatters import format_macd, format_rsi, format_volume
@@ -16,6 +15,9 @@ console = Console()
 
 def run(detailed=False):
     symbols = load_watchlist()
+    symbols = sorted(symbols)
+
+    clear_expired_cache()
     
     if not symbols:
         console.print(Panel.fit(
@@ -69,32 +71,30 @@ def run(detailed=False):
     with Progress(SpinnerColumn(), TextColumn("{task.description}"), console=console, transient=True) as progress:
         task = progress.add_task("[cyan]Analyzing stocks...", total=len(symbols))
         
-        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            future_to_sym = {
-                executor.submit(analyze_stock, sym, vix, regime): sym 
-                for sym in symbols
-            }
-            
-            for future in as_completed(future_to_sym):
-                sym = future_to_sym[future]
+        for symbol in symbols:
+            try:
+                df, info = fetch_stock(symbol, PERIOD)
+                if df is None or info is None:
+                    results.append({"symbol": symbol, "error": "not found"})
+                    continue
+                value_data = analyze_stock(symbol, df, info, vix, regime)
+                results.append(value_data)
+                progress.update(task, description=f"[cyan]Completed analyzing {symbol}...")
+            except Exception as e:
+                results.append({"symbol": symbol, "error": str(e)})
+                progress.console.print(f"[bold red]Error[/bold red] analyzing {symbol}: {e}")
                 
-                try:
-                    res = future.result()
-                    results.append(res)
-                    progress.update(task, description=f"[cyan]Completed analyzing {sym}...")
-                except Exception as e:
-                    results.append({"sym": sym, "error": str(e)})
-                progress.advance(task)
-
+        progress.advance(task)
+    
     # 4. Display Results
-    for idx, res in enumerate(sorted(results, key=lambda x: x['sym']), 1):
-        sym = res['sym']
+    for idx, res in enumerate(sorted(results, key=lambda x: x['symbol']), 1):
+        sym = res['symbol']
         if res.get("error"):
             table.add_row(str(idx), sym, "-", "ERR", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "N/A")
             continue
 
         # Formatters
-        price_color = "green" if res['close'] > res['dma50'] else "red"
+        price_color = "green" if res['price'] > res['dma50'] else "red"
         
         # Supertrend
         st_sig = res.get('supertrend_signal')
@@ -116,7 +116,7 @@ def run(detailed=False):
             str(idx),
             sym,
             res.get('sector', 'Other'),
-            f"[{price_color}]{res['close']:.2f}[/{price_color}]",
+            f"[{price_color}]{res['price']:.2f}[/{price_color}]",
             f"{res['dma50']:.0f}" if res['dma50'] else "-",
             f"{res['dma200']:.0f}" if res['dma200'] else "-",
             format_rsi(res['rsi'], res['rsi_signal']),
@@ -127,7 +127,7 @@ def run(detailed=False):
             adx_disp,
             f"[{f_color}]{fscore}[/{f_color}]/12",
             get_cross_display(res['cross_info']),
-            res['decision']
+            res['rating']
         )
 
     console.print()

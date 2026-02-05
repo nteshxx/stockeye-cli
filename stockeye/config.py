@@ -107,9 +107,7 @@ REDUCE_THRESHOLD = 9
 SELL_THRESHOLD = 7
 
 # ==================== STORAGE ====================
-WATCHLIST_PATH = "data/watchlist.json"
-CACHE_ENABLED = True
-CACHE_EXPIRY_HOURS = 6
+WATCHLIST_FILE = "/app/data/watchlist.json"
 
 # ==================== DISPLAY ====================
 SHOW_PROGRESS = True

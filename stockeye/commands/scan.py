@@ -5,8 +5,9 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
+
 from stockeye.core.rating import get_cross_display
-from stockeye.storage import add_symbols
+from stockeye.services.watchlist_manager import add_symbols
 from stockeye.scanners.graham_value_scanner import scan_for_graham_value
 from stockeye.scanners.strong_buys_scanner import scan_for_strong_buys
 from stockeye.scanners.strong_fundamental_scanner import scan_for_fundamentally_strong
@@ -214,11 +215,10 @@ def fundamentals(
 
 @scan_app.command("graham-value")
 def graham_value(
-    index: str = typer.Option("NIFTY_50", "--index", "-u", help="Stock index (NIFTY_50, NIFTY_500, etc)"),
-    limit: int = typer.Option(50, "--limit", "-l", help="Maximum results"),
+    index: str = typer.Option("NIFTY_50", "--index", "-i", help="Stock index (NIFTY_50, NIFTY_500, etc)"),
+    limit: int = typer.Option(1000, "--limit", "-l", help="Maximum results"),
     min_mos: float = typer.Option(30, "--min-mos", "-m", help="Minimum Margin of Safety %"),
     conservative: bool = typer.Option(False, "--conservative", "-c", help="Use conservative valuation"),
-    batch_size: int = typer.Option(50, "--batch-size", "-b", help="Use batch size"),
     export: bool = typer.Option(False, "--export", "-e", help="Export to watchlist")
 ):
     """
@@ -246,7 +246,7 @@ def graham_value(
     ) as progress:
         task = progress.add_task(f"[cyan]Calculating intrinsic values...", total=100)
         
-        results = scan_for_graham_value(index, limit, min_mos, conservative, batch_size)
+        results = scan_for_graham_value(index, limit, min_mos, conservative, 50)
         progress.update(task, completed=100)
     
     scan_time = time.time() - start_time

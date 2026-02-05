@@ -3,7 +3,7 @@
 from stockeye.core.fundamentals import fundamental_score
 from stockeye.core.margin_of_safety import conservative_intrinsic_value, graham_rating, intrinsic_value, margin_of_safety
 from stockeye.data.load_data import load_nse_symbols
-from stockeye.services.data_fetcher import fetch_stock_batch
+from stockeye.services.data_fetcher import clear_expired_cache, fetch_stock_batch
 from stockeye.utils.utilities import safe_float, safe_get, safe_int
 
 
@@ -91,7 +91,10 @@ def scan_for_graham_value(index="NIFTY_50", limit=50, min_mos=30, conservative=F
     """
     results = []
     symbols = load_nse_symbols(index)
+    symbols = sorted(symbols)
     total_symbols = len(symbols)
+
+    clear_expired_cache()
 
     for i in range(0, total_symbols, batch_size):
         current_batch = symbols[i : i + batch_size]

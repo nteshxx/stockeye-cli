@@ -4,14 +4,12 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from stockeye.storage import load_watchlist
+from stockeye.services.watchlist_manager import add_symbols, load_watchlist
 from stockeye.services.data_fetcher import fetch_stock
 from stockeye.core.margin_of_safety import (
-    calculate_growth,
     intrinsic_value,
     margin_of_safety,
     graham_rating,
-    get_eps_metrics,
     conservative_intrinsic_value
 )
 
@@ -247,7 +245,6 @@ def analyze(
     console.print(wisdom)
     
     if export:
-        from storage import add_symbols
         symbols_to_export = [s["symbol"] for s in results if s["mos_pct"] >= 40]
         if symbols_to_export:
             added = add_symbols(symbols_to_export)

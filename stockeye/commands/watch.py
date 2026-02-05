@@ -1,7 +1,7 @@
 import typer
 from rich.console import Console
 from rich.table import Table
-from stockeye.storage import load_watchlist, add_symbols, remove_symbols, clear_watchlist
+from stockeye.services.watchlist_manager import load_watchlist, add_symbols, remove_symbols, clear_watchlist
 
 watch_app = typer.Typer(help="📋 Manage watchlist")
 console = Console()

@@ -358,8 +358,8 @@ def main(
   ✓ Enhanced F-Score (12 points)
 
 [dim]First time? Try:[/dim]
-  [cyan]stockeye help[/cyan]           - Detailed guide
-  [cyan]stockeye scan strong-buys[/cyan] - Find opportunities
+  [cyan]stockeye help[/cyan]                 - Detailed guide
+  [cyan]stockeye scan strong-buys[/cyan]     - Find opportunities
         """)
 
 

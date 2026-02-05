@@ -1,15 +1,7 @@
 import pandas as pd
 from datetime import datetime
 
-
-def safe_float(value, default=0.0):
-    """Safely convert value to float with null checking"""
-    if value is None or pd.isna(value):
-        return default
-    try:
-        return float(value)
-    except (ValueError, TypeError):
-        return default
+from stockeye.utils.utilities import safe_float
 
 
 def adjust_for_india_vix(rating, vix_value, fscore):

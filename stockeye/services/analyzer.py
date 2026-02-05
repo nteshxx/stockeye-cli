@@ -1,30 +1,27 @@
-from stockeye.config import PERIOD, DMA_SHORT, DMA_LONG
-from stockeye.services.data_fetcher import fetch_stock
+from stockeye.config import DMA_SHORT, DMA_LONG
 from stockeye.core.fundamentals import fundamental_score, get_sector_from_industry
 from stockeye.core.rating import get_rating_score, rating
 from stockeye.core.indicators import (
     add_dma, add_rsi, add_macd, analyze_volume,
     add_bollinger_bands, add_supertrend, add_adx,
-    detect_cross_age, cross_signal,
+    detect_cross_age,
     get_rsi_signal, get_macd_signal, get_volume_signal,
     get_bollinger_signal, get_supertrend_signal, get_adx_signal,
-    fetch_india_vix, detect_market_regime
+    fetch_india_vix
 )
 from stockeye.utils.utilities import safe_float, safe_get, safe_int
 
     
-def analyze_stock(symbol, period="1y", vix_value=None, market_regime=None):
+def analyze_stock(symbol, df, info, vix_value=None, market_regime=None):
     """
     Analyze a single stock with enhanced indicators
     """
     try:
-        df, info = fetch_stock(symbol, period)
-        
         if df is None or info is None or len(df) < 50:
             return None
         
         # Add all indicators
-        df = add_dma(df, 50, 200)
+        df = add_dma(df, DMA_SHORT, DMA_LONG)
         df = add_rsi(df)
         df = add_macd(df)
         df = analyze_volume(df)
@@ -97,7 +94,8 @@ def analyze_stock(symbol, period="1y", vix_value=None, market_regime=None):
             "rating": stock_rating,
             "rating_score": get_rating_score(stock_rating),
             "market_cap": safe_int(info.get("marketCap", 0)),
-            "company_name": info.get("longName", symbol)
+            "company_name": safe_get(info, "longName", symbol),
+            "sector": get_sector_from_industry(safe_get(info, "industry"))
         }
         
     except Exception as e:

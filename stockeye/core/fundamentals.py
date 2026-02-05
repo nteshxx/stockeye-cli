@@ -55,51 +55,62 @@ def fundamental_score(info):
     return min(score, 12)
 
 
-def get_sector_from_industry(industry):
+def get_sector_from_industry(industry: str) -> str:
     """
-    Map industry to broader sector for volatility adjustments
+    Map Yahoo Finance 'industry' string to a custom broad sector bucket.
+    Prioritizes keywords to map distinct sub-industries (e.g., 'Credit Services')
+    to broader groups (e.g., 'BANKING').
     """
-    if industry is None:
+    if not industry or not isinstance(industry, str):
         return "UNKNOWN"
     
-    industry = industry.upper()
+    # Normalize for easier matching
+    ind = industry.upper().strip()
     
-    # Banking & Financial Services
-    if any(term in industry for term in ["BANK", "FINANCE", "INSURANCE", "NBFC"]):
-        return "BANKING"
-    
-    # Information Technology
-    if any(term in industry for term in ["SOFTWARE", "IT ", "TECHNOLOGY", "COMPUTER"]):
-        return "IT"
-    
-    # Pharmaceuticals
-    if any(term in industry for term in ["PHARMA", "DRUG", "HEALTHCARE"]):
-        return "PHARMA"
-    
-    # FMCG
-    if any(term in industry for term in ["CONSUMER", "FMCG", "FOOD", "BEVERAGE", "TOBACCO"]):
-        return "FMCG"
-    
-    # Metals & Mining
-    if any(term in industry for term in ["METAL", "STEEL", "MINING", "ALUMINUM", "COPPER"]):
-        return "METALS"
-    
-    # Automobile
-    if any(term in industry for term in ["AUTO", "VEHICLE", "MOTORCYCLE"]):
-        return "AUTO"
-    
-    # Real Estate
-    if any(term in industry for term in ["REAL ESTATE", "REALTY", "CONSTRUCTION"]):
-        return "REALTY"
-    
-    # Energy & Power
-    if any(term in industry for term in ["POWER", "ENERGY", "OIL", "GAS"]):
-        return "ENERGY"
-    
-    # Telecom
-    if any(term in industry for term in ["TELECOM", "COMMUNICATION"]):
-        return "TELECOM"
-    
+    # Configuration: Define your buckets and their trigger keywords here.
+    # ORDER MATTERS: Put more specific/likely matches earlier if there is overlap risk.
+    sector_keywords = {
+        "BANKING": [
+            "BANK", "FINANCE", "INSURANCE", "NBFC", "CREDIT", 
+            "CAPITAL", "ASSET", "BROKER", "WEALTH", "MORTGAGE"
+        ],
+        "IT": [
+            "SOFTWARE", "TECHNOLOGY", "COMPUTER", "IT ", "DATA", 
+            "INTERNET", "SEMICONDUCTOR", "ELECTRONICS", "DIGITAL", "CHIP"
+        ],
+        "PHARMA": [
+            "PHARMA", "DRUG", "HEALTH", "BIOTECH", "MEDICAL", "LIFE SCIENCE"
+        ],
+        "AUTO": [
+            "AUTO", "VEHICLE", "MOTOR", "TRUCK", "TIRES"
+        ],
+        "FMCG": [
+            "CONSUMER", "FMCG", "FOOD", "BEVERAGE", "TOBACCO", 
+            "HOUSEHOLD", "PERSONAL", "GROCERY"
+        ],
+        "METALS": [
+            "METAL", "STEEL", "MINING", "ALUMINUM", "COPPER", 
+            "ZINC", "GOLD", "SILVER", "MATERIALS"
+        ],
+        "ENERGY": [
+            "POWER", "ENERGY", "OIL", "GAS", "COAL", 
+            "PETROLEUM", "SOLAR", "RENEWABLE", "UTILITIES"
+        ],
+        "REALTY": [
+            "REAL ESTATE", "REALTY", "CONSTRUCTION", "REIT", 
+            "INFRASTRUCTURE", "DEVELOPMENT"
+        ],
+        "TELECOM": [
+            "TELECOM", "COMMUNICATION", "WIRELESS"
+        ]
+    }
+
+    # Iterate through the config to find the first match
+    for sector, keywords in sector_keywords.items():
+        if any(k in ind for k in keywords):
+            return sector
+            
+    # Fallback for unmapped industries (e.g. "Aerospace", "Textile")
     return "OTHER"
 
 

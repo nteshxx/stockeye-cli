@@ -11,8 +11,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 CACHE_DIR = Path("/app/data/cache")
-INFO_CACHE_DURATION = 300  # 5 minutes for stock info
-HISTORY_CACHE_DURATION = 60  # 1 minute for historical data
+INFO_CACHE_DURATION = 3600  # 60 minutes for stock info
+HISTORY_CACHE_DURATION = 3600  # 60 minute for historical data
 
 # In-memory caches
 _info_cache: Dict[str, Tuple[float, dict]] = {}

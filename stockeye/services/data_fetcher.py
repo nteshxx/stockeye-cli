@@ -1,5 +1,5 @@
 import os
-import random
+from stockeye.config import API_DELAY_SECONDS, DEFAULT_WORKERS
 import yfinance as yf
 import pandas as pd
 import time
@@ -67,7 +67,7 @@ def fetch_stock_info(symbol: str, use_cache: bool = True) -> Tuple[str, dict]:
             if _is_cache_valid(timestamp, INFO_CACHE_DURATION):
                 return symbol, info
     
-    time.sleep(random.uniform(0.2, 1))
+    time.sleep(API_DELAY_SECONDS)
     # Fetch from API
     try:
         ticker = yf.Ticker(symbol)
@@ -142,6 +142,7 @@ def fetch_stock_history_batch(symbols: list, period: str, use_cache: bool = True
             if _is_cache_valid(timestamp, HISTORY_CACHE_DURATION):
                 return hist.copy()
     
+    time.sleep(API_DELAY_SECONDS)
     # Fetch from API
     try:
         data = yf.download(
@@ -283,7 +284,7 @@ def fetch_stock_batch(symbols, period):
 
     # Calculate optimal thread count
     # We need enough threads to handle the info requests while download runs
-    max_workers = min((os.cpu_count() or 4), len(symbols) + 1)
+    max_workers = min((os.cpu_count() or DEFAULT_WORKERS), len(symbols) + 1)
     
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # --- PHASE 1: SUBMIT ALL TASKS ---

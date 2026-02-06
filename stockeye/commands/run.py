@@ -6,7 +6,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from stockeye.services.analyzer import analyze_stock
 from stockeye.services.data_fetcher import clear_expired_cache, fetch_stock
 from stockeye.services.watchlist_manager import load_watchlist
-from stockeye.config import MAX_WORKERS, PERIOD
+from stockeye.config import PERIOD
 from stockeye.core.rating import get_cross_display
 from stockeye.core.indicators import fetch_india_vix, detect_market_regime
 from stockeye.utils.formatters import format_macd, format_rsi, format_volume

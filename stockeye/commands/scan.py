@@ -246,7 +246,7 @@ def graham_value(
     ) as progress:
         task = progress.add_task(f"[cyan]Calculating intrinsic values...", total=100)
         
-        results = scan_for_graham_value(index, limit, min_mos, conservative, 50)
+        results = scan_for_graham_value(index, limit, min_mos, conservative)
         progress.update(task, completed=100)
     
     scan_time = time.time() - start_time

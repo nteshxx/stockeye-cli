@@ -1,4 +1,4 @@
-# StockEye Configuration - Indian Market Optimized
+# StockEye Configuration
 # Version 2.0.0
 
 # ==================== DATA FETCHING ====================
@@ -120,13 +120,9 @@ SHOW_MARKET_CAP = True
 SHOW_SECTOR = True
 
 # ==================== PERFORMANCE ====================
-# Parallel processing for scanning
-ENABLE_PARALLEL_PROCESSING = True
-MAX_WORKERS = 8  # Concurrent API calls
-
-# Rate limiting
-API_DELAY_SECONDS = 0.5  # Delay between API calls
-MAX_RETRIES = 3
+DEFAULT_WORKERS = 4  # Concurrent API calls
+API_DELAY_SECONDS = 1  # Delay between API calls
+BATCH_SIZE=100
 
 # ==================== INDICES ====================
 AVAILABLE_INDICES = [
@@ -137,6 +133,7 @@ AVAILABLE_INDICES = [
     "NIFTY_NEXT_50",
     "NIFTY_MIDCAP_100",
     "NIFTY_SMALLCAP_100",
+    "NIFTY_TOTAL_MARKET"
 ]
 
 DEFAULT_INDEX = "NIFTY_50"

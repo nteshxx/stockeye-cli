@@ -1,4 +1,4 @@
-from stockeye.config import PERIOD
+from stockeye.config import BATCH_SIZE, PERIOD
 from stockeye.core.indicators import detect_market_regime, fetch_india_vix
 from stockeye.data.load_data import load_nse_symbols
 from stockeye.services.analyzer import analyze_stock
@@ -14,7 +14,6 @@ def scan_for_fundamentally_strong(index="NIFTY_50", limit=50, period="1y"):
     symbols = load_nse_symbols(index)
     symbols = sorted(symbols)
     total_symbols = len(symbols)
-    batch_size=50
 
     clear_expired_cache()
     
@@ -26,8 +25,8 @@ def scan_for_fundamentally_strong(index="NIFTY_50", limit=50, period="1y"):
     except:
         regime = "UNKNOWN"
 
-    for i in range(0, total_symbols, batch_size):
-        current_batch = symbols[i : i + batch_size]
+    for i in range(0, total_symbols, BATCH_SIZE):
+        current_batch = symbols[i : i + BATCH_SIZE]
         stock_data = fetch_stock_batch(current_batch, period=PERIOD)
         
         for symbol in current_batch:

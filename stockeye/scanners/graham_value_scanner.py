@@ -1,5 +1,6 @@
 
 
+from stockeye.config import BATCH_SIZE
 from stockeye.core.fundamentals import fundamental_score
 from stockeye.core.margin_of_safety import conservative_intrinsic_value, graham_rating, intrinsic_value, margin_of_safety
 from stockeye.data.load_data import load_nse_symbols
@@ -75,7 +76,7 @@ def analyze_stock_mos_value(symbol, df, info, conservative=False):
         return None
     
 
-def scan_for_graham_value(index="NIFTY_50", limit=50, min_mos=30, conservative=False, batch_size=50):
+def scan_for_graham_value(index="NIFTY_50", limit=50, min_mos=30, conservative=False):
     """
     Scan for Graham-style value stocks (Margin of Safety analysis) with null safety
     
@@ -84,7 +85,6 @@ def scan_for_graham_value(index="NIFTY_50", limit=50, min_mos=30, conservative=F
         limit: Maximum number of results
         min_mos: Minimum Margin of Safety percentage
         conservative: Use conservative valuation method
-        batch_size: Number of stocks to process in one memory cycle
     
     Returns:
         list: Value stocks sorted by MOS percentage
@@ -96,8 +96,8 @@ def scan_for_graham_value(index="NIFTY_50", limit=50, min_mos=30, conservative=F
 
     clear_expired_cache()
 
-    for i in range(0, total_symbols, batch_size):
-        current_batch = symbols[i : i + batch_size]
+    for i in range(0, total_symbols, BATCH_SIZE):
+        current_batch = symbols[i : i + BATCH_SIZE]
         stock_data = fetch_stock_batch(current_batch, period="5y")
     
         for symbol in current_batch:

@@ -19,6 +19,7 @@ def load_nse_symbols(index: str = "NIFTY_50") -> list[str]:
         if "symbol" not in df.columns:
             raise ValueError(f"'symbol' column not found in {path}")
 
+        suffix = "-SM.NS" if ("SME" in index.upper()) else ".NS"
         symbols = (
             df["symbol"]
             .dropna()
@@ -26,7 +27,7 @@ def load_nse_symbols(index: str = "NIFTY_50") -> list[str]:
             .str.strip()
             .str.upper()
             .loc[lambda s: ~s.str.contains("NIFTY", na=False)]
-            .add(".NS")
+            .add(suffix)
             .unique()
             .tolist()
         )

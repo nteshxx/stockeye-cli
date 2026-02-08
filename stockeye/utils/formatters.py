@@ -39,3 +39,52 @@ def format_time(seconds):
         minutes = int(seconds // 60)
         secs = seconds % 60
         return f"{minutes}m {secs:.1f}s"
+
+def format_price(price: float) -> str:
+    """Format price with rupee symbol"""
+    return f"₹{price:.2f}"
+
+
+def format_percentage(value: float, threshold_good: float = 0) -> str:
+    """Format percentage with color coding"""
+    if value >= threshold_good:
+        return f"[green]{value:.1f}%[/green]"
+    elif value >= threshold_good * 0.7:
+        return f"[yellow]{value:.1f}%[/yellow]"
+    else:
+        return f"[red]{value:.1f}%[/red]"
+
+
+def format_ratio(value: float, lower_is_better: bool = True) -> str:
+    """Format ratio with color coding"""
+    if value is None:
+        return "[dim]N/A[/dim]"
+    
+    if lower_is_better:
+        if value < 0.5:
+            return f"[green]{value:.2f}[/green]"
+        elif value < 1.0:
+            return f"[yellow]{value:.2f}[/yellow]"
+        else:
+            return f"[red]{value:.2f}[/red]"
+    else:
+        if value > 2.0:
+            return f"[green]{value:.2f}[/green]"
+        elif value > 1.0:
+            return f"[yellow]{value:.2f}[/yellow]"
+        else:
+            return f"[red]{value:.2f}[/red]"
+
+
+def format_score(score: int, max_score: int) -> str:
+    """Format score with color coding"""
+    percentage = (score / max_score) * 100
+    
+    if percentage >= 80:
+        return f"[bold green]{score}/{max_score}[/bold green]"
+    elif percentage >= 60:
+        return f"[green]{score}/{max_score}[/green]"
+    elif percentage >= 40:
+        return f"[yellow]{score}/{max_score}[/yellow]"
+    else:
+        return f"[red]{score}/{max_score}[/red]"

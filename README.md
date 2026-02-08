@@ -303,6 +303,57 @@ stockeye watch clear
 - **Bear Market**: More conservative, quality focus
 - **Sideways**: Neutral, stock-specific
 
+## 🎯 Bargain Scan
+
+### 1. 💎 NET-NET (Graham's Favorite)
+- Trading below 2/3 of Net Current Asset Value (NCAV)
+- Ultimate margin of safety - buying below liquidation value
+- Extremely rare - typically appears during crashes
+- **Graham's Best Strategy**: Averaged 20%+ annual returns
+
+### 2. 🏦 ASSET PLAY
+- Trading below book value or liquidation value
+- Asset-rich companies selling at discount
+- Gets fixed assets, brands, IP for free
+- Good for patient investors
+
+### 3. 🚬 CIGAR BUTT
+- Beaten-down but still profitable
+- "One last puff" opportunity
+- Very low P/E (< 7) and P/B (< 0.8)
+- Short-term value play - exit quickly
+
+### 4. 🛡️ DEFENSIVE
+- Meets Graham's 7 defensive investor criteria
+- Quality companies at fair prices
+- For passive, low-risk investors
+- Expected: 10-12% annual returns
+
+### 5. ⭐ DEEP VALUE
+- High margin of safety (≥40%)
+- Significant undervaluation vs intrinsic value
+- For enterprising investors
+- Potential: 15-20%+ returns
+
+### 6. ✅ MODERATE VALUE
+- Good value (25-40% margin of safety)
+- Reasonable opportunity
+- Lower risk than deep value
+
+### 7. 📊 STATISTICAL BARGAIN
+- Meets multiple quantitative criteria
+- Diversified approach
+- Statistical edge over time
+
+### 8. ⚠️ DISTRESSED
+- Financially troubled companies
+- High-risk turnaround plays
+- Only for experienced investors
+
+### 9. ❌ OVERVALUED
+- No margin of safety
+- Avoid or wait for correction
+
 ## 📊 Supported Indices
 
 ```
@@ -410,6 +461,28 @@ stockeye scan mos --min-mos 35 --export
 
 # Scan FMCG (most stable)
 # Best for conservative investors
+```
+
+### Example 5: Graham Value Bargain Sacn
+
+```bash
+# Scan for all bargain types in NIFTY 500
+stockeye bargain all --index NIFTY_500 --min-score 60
+
+# Find rare Net-Net opportunities
+stockeye bargain net-nets --index NIFTY_500
+
+# Scan for Asset Plays and export to watchlist
+stockeye bargain asset-plays --index NIFTY_500 --export
+
+# Find Defensive stocks for passive investing
+stockeye bargain defensive --index NIFTY_50 --min-score 6
+
+# Deep Value scan with custom MOS threshold
+stockeye bargain deep-value --index NIFTY_500 --min-mos 50
+
+# Cigar Butts for aggressive traders
+stockeye bargain cigar-butts --index NIFTY_500 --min-score 4
 ```
 
 ## 🐛 Troubleshooting

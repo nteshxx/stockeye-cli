@@ -3,7 +3,7 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from stockeye.commands import watch_app, scan_app, mos_app, run
+from stockeye.commands import watch_app, scan_app, mos_app, bargain_app, run
 
 console = Console()
 
@@ -20,6 +20,7 @@ app = typer.Typer(
 app.add_typer(watch_app, name="watch")
 app.add_typer(scan_app, name="scan")
 app.add_typer(mos_app, name="mos")
+app.add_typer(bargain_app, name="bargain")
 
 
 @app.command()

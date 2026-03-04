@@ -121,8 +121,8 @@ SHOW_SECTOR = True
 
 # ==================== PERFORMANCE ====================
 DEFAULT_WORKERS = 4  # Concurrent API calls
-API_DELAY_SECONDS = 1  # Delay between API calls
-BATCH_SIZE=100
+API_DELAY_SECONDS = 5  # Delay between API calls
+BATCH_SIZE=50
 
 # ==================== INDICES ====================
 AVAILABLE_INDICES = [

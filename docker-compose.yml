@@ -1,8 +1,8 @@
 services:
   stockeye:
     build: .
-    image: stockeye-cli:1.0.0
-    container_name: stockeye-cli
+    image: stockeye:1.0.0
+    container_name: stockeye
     stdin_open: true
     tty: true
     command: sleep infinity
